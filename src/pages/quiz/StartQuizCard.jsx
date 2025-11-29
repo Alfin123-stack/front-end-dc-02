@@ -1,34 +1,23 @@
 import { motion } from "framer-motion";
 import { FaClock, FaListOl, FaChartLine, FaBook, FaPlay } from "react-icons/fa";
 
-export default function StartQuizCard({
-  meta,
-  level,
-  questions,
-  onStart,
-  theme,
-  data,
-}) {
-  const isDark = theme === "dark";
-
+export default function StartQuizCard({ meta, level, onStart, data }) {
   const { quizData, tutorial, timeLeft: time, currentQuestion } = data;
-
   const q = quizData[currentQuestion];
+
+  console.log(q);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: "easeOut" }}
-      className={`
+      className="
         p-6 rounded-2xl border shadow-xl transition 
         backdrop-blur-md
-        ${
-          isDark
-            ? "bg-[#111827]/90 border-gray-700 text-white shadow-black/40"
-            : "bg-white/90 border-gray-200 text-gray-900 shadow-gray-300/50"
-        }
-      `}>
+        bg-white/90 border-gray-200 text-gray-900 shadow-gray-300/50
+        dark:bg-[#111827]/90 dark:border-gray-700 dark:text-white dark:shadow-black/40
+      ">
       {/* Title */}
       <div className="flex items-center gap-3 mb-4">
         <motion.div
@@ -42,7 +31,7 @@ export default function StartQuizCard({
         </h2>
       </div>
 
-      <p className={`${isDark ? "text-gray-300" : "text-gray-600"} mb-6`}>
+      <p className="text-gray-600 dark:text-gray-300 mb-6">
         Level <span className="font-semibold">{level}</span> •{" "}
         {meta?.description || "Uji kemampuanmu sekarang!"}
       </p>
@@ -52,10 +41,10 @@ export default function StartQuizCard({
         {/* Jumlah Soal */}
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`
+          className="
             p-4 rounded-xl flex items-center gap-4 transition
-            ${isDark ? "bg-gray-800/80" : "bg-gray-100"}
-          `}>
+            bg-gray-100 dark:bg-gray-800/80
+          ">
           <FaListOl className="text-2xl text-blue-400" />
           <div>
             <p className="text-sm opacity-70">Jumlah Soal</p>
@@ -66,10 +55,10 @@ export default function StartQuizCard({
         {/* Waktu */}
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`
+          className="
             p-4 rounded-xl flex items-center gap-4 transition
-            ${isDark ? "bg-gray-800/80" : "bg-gray-100"}
-          `}>
+            bg-gray-100 dark:bg-gray-800/80
+          ">
           <FaClock className="text-2xl text-yellow-400" />
           <div>
             <p className="text-sm opacity-70">Waktu Tersedia</p>
@@ -77,13 +66,13 @@ export default function StartQuizCard({
           </div>
         </motion.div>
 
-        {/* Tingkat Kesulitan */}
+        {/* Difficulty */}
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`
+          className="
             p-4 rounded-xl flex items-center gap-4 transition
-            ${isDark ? "bg-gray-800/80" : "bg-gray-100"}
-          `}>
+            bg-gray-100 dark:bg-gray-800/80
+          ">
           <FaChartLine className="text-2xl text-green-400" />
           <div>
             <p className="text-sm opacity-70">Tingkat Kesulitan</p>
@@ -94,20 +83,16 @@ export default function StartQuizCard({
         </motion.div>
       </div>
 
-      {/* START BUTTON */}
+      {/* Start */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.97 }}
         onClick={onStart}
-        className={`
+        className="
           w-full py-3 rounded-xl font-semibold text-lg flex items-center justify-center gap-2
           shadow-lg transition
-          ${
-            isDark
-              ? "bg-blue-600 hover:bg-blue-700 text-white"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
-          }
-        `}>
+          bg-blue-600 hover:bg-blue-700 text-white
+        ">
         <FaPlay className="text-sm" />
         Mulai Quiz
       </motion.button>

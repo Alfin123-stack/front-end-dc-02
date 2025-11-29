@@ -60,28 +60,6 @@ export default function SettingsScreen({
           ? "bg-gray-900 text-white"
           : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-900"
       }`}>
-      {/* Home Button */}
-      <div className="fixed top-6 right-6 z-50">
-        <button
-          onClick={() => navigate("/")}
-          className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-300 dark:border-gray-600 shadow hover:scale-110 transition">
-          <FaHome size={22} className="text-purple-600 dark:text-blue-300" />
-        </button>
-      </div>
-
-      {/* Theme Toggle */}
-      <div className="fixed top-6 left-6 z-50">
-        <button
-          onClick={onToggleTheme}
-          className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-300 dark:border-gray-600 shadow hover:scale-110 transition">
-          {settings.theme === "dark" ? (
-            <FaMoon size={22} className="text-purple-300" />
-          ) : (
-            <FaSun size={22} className="text-yellow-500" />
-          )}
-        </button>
-      </div>
-
       {/* CONTENT */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}

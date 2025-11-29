@@ -1,4 +1,3 @@
-// components/completion/CompletionActions.jsx
 "use client";
 
 import React from "react";
@@ -17,79 +16,103 @@ export default function CompletionActions({
   onNextLevel,
   onShowReview,
   onRestart,
-  onGoDashboard, // optional
-  onShareScore, // optional
+  onGoDashboard,
+  onShareScore,
+  onGoHome, // ← tambahkan prop
 }) {
-  const buttonBase =
-    "flex items-center gap-3 px-7 py-4 text-lg font-bold rounded-2xl shadow-xl " +
-    "transition-all select-none backdrop-blur-sm " +
-    "text-white dark:text-white";
+  const base =
+    "flex items-center justify-center gap-3 w-full sm:w-auto " +
+    "px-5 py-3 md:px-7 md:py-4 rounded-2xl font-semibold md:font-bold " +
+    "text-sm md:text-lg select-none transition-all active:scale-95 " +
+    "border backdrop-blur-md text-white";
 
   const hoverAnim = {
-    whileHover: { scale: 1.07, boxShadow: "0 0 20px rgba(255,255,255,0.25)" },
-    whileTap: { scale: 0.95 },
+    whileHover: { scale: 1.03 },
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-center items-center flex-wrap gap-5 mt-12">
+    <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 md:gap-5 mt-10 md:mt-12 w-full px-3">
       {/* NEXT LEVEL */}
       {canGoNextLevel && (
         <motion.button
-          onClick={onNextLevel}
           {...hoverAnim}
-          className={`${buttonBase} bg-gradient-to-r 
-            from-green-400 to-emerald-600 
-            dark:from-green-500 dark:to-emerald-700`}>
-          <PiArrowElbowRightBold size={24} />
-          Lanjut ke Level {currentLevel + 1}
+          onClick={onNextLevel}
+          className={`${base}
+            bg-gradient-to-br from-emerald-500 to-emerald-700
+            dark:from-emerald-600 dark:to-emerald-800
+            border-emerald-400/20
+          `}>
+          <PiArrowElbowRightBold size={22} />
+          <span>Level {currentLevel + 1}</span>
         </motion.button>
       )}
 
       {/* REVIEW */}
       <motion.button
-        onClick={onShowReview}
         {...hoverAnim}
-        className={`${buttonBase} bg-gradient-to-r 
-          from-blue-500 to-indigo-600 
-          dark:from-blue-600 dark:to-indigo-700`}>
-        <PiBooksBold size={24} />
-        Lihat Pembahasan
+        onClick={onShowReview}
+        className={`${base}
+          bg-gradient-to-br from-blue-500 to-indigo-600
+          dark:from-blue-600 dark:to-indigo-800
+          border-blue-400/20
+        `}>
+        <PiBooksBold size={22} />
+        <span>Pembahasan</span>
       </motion.button>
 
       {/* RETAKE */}
       <motion.button
-        onClick={onRestart}
         {...hoverAnim}
-        className={`${buttonBase} bg-gradient-to-r 
-          from-gray-600 to-gray-800 
-          dark:from-gray-500 dark:to-gray-700`}>
-        <PiArrowCounterClockwiseBold size={24} />
-        Ulangi Quiz
+        onClick={onRestart}
+        className={`${base}
+          bg-gradient-to-br from-gray-600 to-gray-800
+          dark:from-zinc-700 dark:to-zinc-900
+          border-zinc-400/20
+        `}>
+        <PiArrowCounterClockwiseBold size={22} />
+        <span>Ulangi</span>
       </motion.button>
 
-      {/* OPTIONAL — GO TO DASHBOARD */}
+      {/* HOME — SELALU ADA */}
+      <motion.button
+        {...hoverAnim}
+        onClick={onGoHome}
+        className={`${base}
+          bg-gradient-to-br from-slate-500 to-slate-700
+          dark:from-slate-600 dark:to-slate-800
+          border-slate-400/20
+        `}>
+        <PiHouseBold size={22} />
+        <span>Home</span>
+      </motion.button>
+
+      {/* DASHBOARD (opsional) */}
       {onGoDashboard && (
         <motion.button
-          onClick={onGoDashboard}
           {...hoverAnim}
-          className={`${buttonBase} bg-gradient-to-r 
-            from-slate-500 to-slate-700 
-            dark:from-slate-600 dark:to-slate-800`}>
-          <PiHouseBold size={24} />
-          Kembali ke Dashboard
+          onClick={onGoDashboard}
+          className={`${base}
+            bg-gradient-to-br from-slate-600 to-slate-800
+            dark:from-slate-700 dark:to-slate-900
+            border-slate-400/20
+          `}>
+          <PiHouseBold size={22} />
+          <span>Dashboard</span>
         </motion.button>
       )}
 
-      {/* OPTIONAL — SHARE SCORE */}
+      {/* SHARE */}
       {onShareScore && (
         <motion.button
-          onClick={onShareScore}
           {...hoverAnim}
-          className={`${buttonBase} bg-gradient-to-r 
-            from-purple-500 to-fuchsia-600 
-            dark:from-purple-600 dark:to-fuchsia-700`}>
-          <PiShareFatBold size={24} />
-          Bagikan Nilai
+          onClick={onShareScore}
+          className={`${base}
+            bg-gradient-to-br from-purple-500 to-fuchsia-600
+            dark:from-purple-600 dark:to-fuchsia-800
+            border-purple-400/20
+          `}>
+          <PiShareFatBold size={22} />
+          <span>Bagikan</span>
         </motion.button>
       )}
     </div>

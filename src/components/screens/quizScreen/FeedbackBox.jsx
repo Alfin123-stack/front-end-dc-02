@@ -10,26 +10,31 @@ export default function FeedbackBox({ isCorrect, explanation }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className={`mt-6 p-5 md:p-6 rounded-2xl border shadow-lg relative overflow-hidden
+      className={`
+        mt-6 p-5 md:p-6 rounded-2xl border relative overflow-hidden
+        shadow-[0_8px_30px_rgb(0,0,0,0.12)]
+        transition-all duration-300
+
         ${
           isCorrect
-            ? "border-green-300 bg-gradient-to-br from-green-100/70 to-green-200/50 dark:from-green-900/40 dark:to-green-800/20"
-            : "border-red-300 bg-gradient-to-br from-red-100/70 to-red-200/50 dark:from-red-900/40 dark:to-red-800/20"
+            ? "border-green-300 bg-gradient-to-br from-green-100/70 to-green-200/40 dark:from-green-900/40 dark:to-green-800/25"
+            : "border-red-300 bg-gradient-to-br from-red-100/70 to-red-200/40 dark:from-red-900/40 dark:to-red-800/25"
         }
       `}>
-      {/* Soft Glow Decoration */}
+      {/* Soft Glow */}
       <div
-        className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-30
+        className={`
+          absolute -top-16 -right-12 w-40 h-40 rounded-full blur-3xl opacity-25
           ${
             isCorrect
-              ? "bg-green-300 dark:bg-green-600/40"
+              ? "bg-green-300 dark:bg-green-500/40"
               : "bg-red-400 dark:bg-red-600/40"
           }
-      `}
+        `}
       />
 
-      {/* Header Status */}
-      <div className="flex items-center gap-4 mb-3">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-4">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -43,16 +48,21 @@ export default function FeedbackBox({ isCorrect, explanation }) {
 
         <div>
           <p
-            className={`text-lg md:text-xl font-bold ${
-              isCorrect
-                ? "text-green-800 dark:text-green-300"
-                : "text-red-800 dark:text-red-300"
-            }`}>
+            className={`
+              text-lg md:text-xl font-bold
+              ${
+                isCorrect
+                  ? "text-green-800 dark:text-green-300"
+                  : "text-red-800 dark:text-red-300"
+              }
+            `}>
             {isCorrect ? "Jawaban Tepat! 🎉" : "Jawaban Belum Tepat 😥"}
           </p>
 
           <span
-            className={`inline-block mt-1 text-[11px] md:text-xs px-2 py-0.5 rounded-full font-semibold
+            className={`
+              inline-block mt-1 text-[11px] md:text-xs px-2 py-0.5 rounded-full font-semibold
+              shadow-sm
               ${isCorrect ? "bg-green-600 text-white" : "bg-red-600 text-white"}
             `}>
             {isCorrect ? "CORRECT" : "INCORRECT"}
@@ -61,16 +71,23 @@ export default function FeedbackBox({ isCorrect, explanation }) {
       </div>
 
       {/* Divider */}
-      <div className="h-[1px] w-full bg-gray-300/70 dark:bg-gray-700/50 my-4" />
+      <div className="h-[1px] w-full bg-gray-300/70 dark:bg-gray-700/40 my-4" />
 
-      {/* Explanation */}
+      {/* Explanation Box */}
       <div className="flex gap-3 md:gap-4">
         <FaInfoCircle className="text-gray-700 dark:text-gray-300 mt-1 text-lg md:text-xl" />
 
         <div
-          className="text-gray-800 dark:text-gray-200 leading-relaxed 
-          bg-white/70 dark:bg-gray-800/40 p-4 rounded-xl border 
-          border-gray-200 dark:border-gray-700 shadow-sm flex-1">
+          className="
+            flex-1 leading-relaxed
+            text-gray-800 dark:text-gray-100
+
+            bg-white/80 dark:bg-gray-800/50
+            p-4 rounded-xl
+
+            border border-gray-200 dark:border-gray-700
+            shadow-sm
+          ">
           {explanation ? (
             <p className="text-sm md:text-base">
               <span className="font-semibold">Penjelasan: </span>
@@ -86,11 +103,14 @@ export default function FeedbackBox({ isCorrect, explanation }) {
 
       {/* Motivation */}
       <p
-        className={`mt-4 text-xs md:text-sm italic ${
-          isCorrect
-            ? "text-green-700 dark:text-green-300"
-            : "text-red-700 dark:text-red-300"
-        }`}>
+        className={`
+          mt-4 text-xs md:text-sm italic
+          ${
+            isCorrect
+              ? "text-green-700 dark:text-green-300"
+              : "text-red-700 dark:text-red-300"
+          }
+        `}>
         {isCorrect
           ? "Mantap! Pertahankan ritmemu 🔥"
           : "Belum tepat, tapi kamu pasti bisa! Coba lagi ya 💪"}

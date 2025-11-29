@@ -9,17 +9,6 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { fetchUserPreferences } from "./store/settingsSlice";
 
-function SettingsDOMEffect() {
-  // hanya theme yang perlu apply langsung
-  const theme = store.getState().settings.theme;
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
-
-  return null;
-}
-
 function LoadUserPreferences() {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -40,7 +29,6 @@ export default function App() {
   return (
     <Provider store={store}>
       <LoadUserPreferences />
-      <SettingsDOMEffect />
 
       <Toaster position="top-right" richColors />
       <UnlockProvider>

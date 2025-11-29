@@ -1,11 +1,14 @@
-/* index.css */
+/* =====================================
+   TAILWIND IMPORT (WAJIB URUT BEGINI)
+===================================== */
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
 
 /* =====================================
-   LAYOUT WIDTH
+   CUSTOM STYLES
 ===================================== */
+
+/* LAYOUT WIDTH */
 .screen-mediumWidth {
   max-width: 850px;
   width: 100%;
@@ -20,59 +23,45 @@
   padding: 0;
 }
 
-/* =====================================
-   FONT FAMILY
-===================================== */
-
-/* Default: Arial (lebih bersih dan konsisten) */
+/* FONT FAMILY */
 .font-default {
   font-family: Arial, sans-serif !important;
 }
 
-/* Serif mode */
 .font-serif {
   font-family: "Georgia", serif !important;
 }
 
-/* OpenDyslexic — versi fix */
 .font-open-dyslexic {
   font-family: "Open-Dyslexic", sans-serif !important;
 }
 
-/* =====================================
-   FONT SIZE
-===================================== */
+/* FONT SIZE */
 .font-small {
-  font-size: 0.875rem !important; /* = 14px */
+  font-size: 0.875rem !important;
 }
 
 .font-medium {
-  font-size: 1rem !important; /* = 16px */
+  font-size: 1rem !important;
 }
 
 .font-large {
-  font-size: 1.25rem !important; /* = 20px */
+  font-size: 1.25rem !important;
 }
 
-/* =====================================
-   TOASTER THEME
-===================================== */
+/* TOASTER THEME */
 :root {
   --toast-bg: #ffffff;
   --toast-text: #111827;
   --toast-border: rgba(0, 0, 0, 0.15);
 }
 
-.dark {
-  --toast-bg: #1f2937;
-  --toast-text: #f3f4f6;
-  --toast-border: rgba(255, 255, 255, 0.15);
-}
+/* =====================================
+   TAILWIND DARK VARIANT
+===================================== */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* =====================================
-   SMOOTHING (OpenDyslexic tampak lebih bersih)
+   TAILWIND UTILITIES
 ===================================== */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@tailwind utilities;

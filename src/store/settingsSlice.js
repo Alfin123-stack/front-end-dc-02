@@ -5,17 +5,12 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 // ============================================================
 const defaultSettings = {
   theme: "light",
-
-  // font default
   fontFamily: "default",
-
   fontSize: "medium",
-
-  // orientation sudah dihapus
   layoutWidth: "mediumWidth",
 };
 
-// load saved settings
+// Load saved settings
 const saved = localStorage.getItem("quizSettings");
 const initialState = saved
   ? { ...defaultSettings, ...JSON.parse(saved), status: "idle", error: null }
@@ -27,7 +22,6 @@ const initialState = saved
 const mapBackendPreferences = (prefs = {}) => {
   const mapped = {};
 
-  // layoutWidth
   if (prefs.layoutWidth) {
     mapped.layoutWidth =
       prefs.layoutWidth === "fullWidth" || prefs.layoutWidth === "mediumWidth"
@@ -35,15 +29,12 @@ const mapBackendPreferences = (prefs = {}) => {
         : "mediumWidth";
   }
 
-  // fontStyle → fontFamily
   if (prefs.fontStyle) {
     mapped.fontFamily = prefs.fontStyle;
   }
 
-  // theme
   if (prefs.theme) mapped.theme = prefs.theme;
 
-  // fontSize
   if (prefs.fontSize) mapped.fontSize = prefs.fontSize;
 
   return mapped;
@@ -74,6 +65,28 @@ export const fetchUserPreferences = createAsyncThunk(
 );
 
 // ============================================================
+// Helper: apply theme to <html>
+// ============================================================
+const applyThemeToHtml = (theme) => {
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.classList.add("dark");
+  } else {
+    root.classList.remove("dark");
+  }
+};
+
+// ============================================================
+// Helper: Save to localStorage
+// ============================================================
+const saveToLocalStorage = (state) => {
+  const cloned = { ...state };
+  delete cloned.status;
+  delete cloned.error;
+  localStorage.setItem("quizSettings", JSON.stringify(cloned));
+};
+
+// ============================================================
 // SLICE
 // ============================================================
 const settingsSlice = createSlice({
@@ -83,10 +96,18 @@ const settingsSlice = createSlice({
   reducers: {
     updateSettings: (state, action) => {
       Object.assign(state, action.payload);
+      saveToLocalStorage(state);
+
+      // apply theme change if included
+      if (action.payload.theme) {
+        applyThemeToHtml(action.payload.theme);
+      }
     },
 
     toggleTheme: (state) => {
       state.theme = state.theme === "light" ? "dark" : "light";
+      applyThemeToHtml(state.theme);
+      saveToLocalStorage(state);
     },
   },
 
@@ -99,6 +120,9 @@ const settingsSlice = createSlice({
         state.status = "succeeded";
         const mapped = mapBackendPreferences(action.payload);
         Object.assign(state, mapped);
+
+        applyThemeToHtml(mapped.theme || state.theme);
+        saveToLocalStorage(state);
       })
       .addCase(fetchUserPreferences.rejected, (state, action) => {
         state.status = "failed";

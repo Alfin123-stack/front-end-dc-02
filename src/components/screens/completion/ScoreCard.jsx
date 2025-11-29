@@ -1,4 +1,3 @@
-// components/completion/ScoreCard.jsx
 "use client";
 
 import React from "react";
@@ -10,6 +9,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaChartPie,
+  FaMedal,
 } from "react-icons/fa";
 
 export default function ScoreCard({
@@ -21,46 +21,41 @@ export default function ScoreCard({
   currentLevel,
   kkm,
 }) {
-  /** ===============================
-   *  SANITASI & PEMBERSIHAN ANGKA
-   * =============================== */
-  const cleanScore = Number(score || 0); // Pastikan integer
+  const cleanScore = Number(score || 0);
   const cleanTotal = Number(totalQuestions || 1);
-
-  // Hitung ulang persentase agar tidak salah
   const fixedPercentage = Number(((cleanScore / cleanTotal) * 100).toFixed(2));
 
   /** ===============================
-   *  ICON STATUS
+   *  STATUS ICON
    * =============================== */
   const StatusIcon = () => {
     if (timeUp)
       return (
         <FaClock
-          size={100}
-          className="mx-auto text-red-400 dark:text-red-300 drop-shadow-xl"
+          size={90}
+          className="mx-auto text-red-500 dark:text-red-400 drop-shadow"
         />
       );
 
     if (isPassed)
       return (
         <FaTrophy
-          size={100}
-          className="mx-auto text-yellow-400 drop-shadow-[0_0_20px_rgba(255,200,0,0.6)]"
+          size={90}
+          className="mx-auto text-yellow-400 dark:text-yellow-300 drop-shadow"
         />
       );
 
     return (
-      <FaStar
-        size={100}
+      <FaMedal
+        size={90}
         className="mx-auto text-gray-300 dark:text-gray-500 drop-shadow"
       />
     );
   };
 
   return (
-    <div className="flex flex-col items-center mb-12 w-full px-4">
-      {/* ICON STATUS */}
+    <div className="flex flex-col items-center mb-12 w-full px-4 sm:px-6 lg:px-8">
+      {/* STATUS ICON */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -69,24 +64,24 @@ export default function ScoreCard({
         <StatusIcon />
       </motion.div>
 
-      {/* BADGE LEVEL */}
+      {/* LEVEL BADGE */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         className="
           px-5 py-1.5 rounded-full text-sm
-          bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20
-          dark:from-purple-700/30 dark:to-fuchsia-700/30
-          border border-purple-500/40 dark:border-purple-300/30
+          bg-purple-500/15 dark:bg-purple-700/20
+          border border-purple-500/30 dark:border-purple-400/20
           text-purple-700 dark:text-purple-200
-          font-semibold shadow-md backdrop-blur-md mb-4
+          font-semibold shadow-sm backdrop-blur
+          mb-4
         ">
         Level {currentLevel}
       </motion.div>
 
-      {/* HEADER */}
-      <h2 className="text-3xl font-extrabold text-center mb-4 tracking-tight">
-        {timeUp ? "⏰ Waktu Habis!" : "Level Selesai 🎉"}
+      {/* PAGE TITLE */}
+      <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-4 tracking-tight">
+        {timeUp ? "⏰ Waktu Habis" : "Level Selesai 🎉"}
       </h2>
 
       {/* INFO BAR */}
@@ -97,9 +92,9 @@ export default function ScoreCard({
           w-full text-center mb-6 px-4 py-3 rounded-2xl 
           bg-blue-100/60 dark:bg-blue-900/40 
           border border-blue-300/40 dark:border-blue-700/40
-          shadow-sm backdrop-blur-sm
+          shadow-sm backdrop-blur
         ">
-        <p className="font-semibold text-sm sm:text-base flex items-center justify-center gap-2 flex-wrap">
+        <p className="font-semibold text-sm sm:text-base flex items-center justify-center gap-3 flex-wrap">
           <span className="flex items-center gap-1">
             <FaChartPie className="text-blue-600 dark:text-blue-300" />
             KKM: <b>{kkm}%</b>
@@ -115,7 +110,7 @@ export default function ScoreCard({
 
           {isPassed ? (
             <span className="flex items-center gap-1 text-green-600 dark:text-green-400 font-bold">
-              <FaCheckCircle /> LULUS 🎉
+              <FaCheckCircle /> LULUS
             </span>
           ) : (
             <span className="flex items-center gap-1 text-red-600 dark:text-red-400 font-bold">
@@ -125,44 +120,41 @@ export default function ScoreCard({
         </p>
       </motion.div>
 
-      {/* MAIN SCORE CARD */}
+      {/* SCORE CARD */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.45 }}
         className={`
           relative w-full max-w-md py-10 px-6 rounded-3xl 
-          shadow-2xl overflow-hidden border backdrop-blur-xl
+          shadow-xl overflow-hidden border backdrop-blur-xl
           ${
             isPassed
-              ? "bg-gradient-to-br from-green-500/80 to-emerald-600/90 border-green-300/40 dark:border-green-800/40"
-              : "bg-gradient-to-br from-blue-500/80 to-indigo-600/90 border-indigo-300/40 dark:border-indigo-800/40"
+              ? "bg-gradient-to-br from-green-600 to-emerald-700 dark:from-green-700 dark:to-emerald-800 border-green-300/30 dark:border-green-800/40"
+              : "bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 border-blue-300/30 dark:border-blue-800/40"
           }
           text-white
         `}>
-        {/* Glow Overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2),transparent)] opacity-40" />
-
-        {/* Label */}
+        {/* LABEL */}
         <p className="text-lg text-center opacity-90 flex items-center justify-center gap-2 mb-1">
           <FaChartPie /> Skor Akhir
         </p>
 
-        {/* Big Score */}
-        <p className="text-6xl font-extrabold text-center mt-2 drop-shadow-lg">
+        {/* BIG SCORE */}
+        <p className="text-6xl sm:text-7xl font-extrabold text-center mt-2 drop-shadow">
           {cleanScore} / {cleanTotal}
         </p>
 
-        {/* Percentage */}
+        {/* PERCENT */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-4xl font-extrabold text-center mt-2 drop-shadow">
+          className="text-4xl sm:text-5xl font-extrabold text-center mt-2 drop-shadow">
           {fixedPercentage}%
         </motion.p>
 
-        {/* Mini icons */}
-        <div className="flex justify-center gap-5 mt-7 opacity-90 text-xl">
+        {/* MINI ICONS */}
+        <div className="flex justify-center gap-5 mt-7 opacity-95 text-xl">
           <FaStar className="drop-shadow" />
           <FaStar className="drop-shadow" />
           <FaStar className="drop-shadow" />

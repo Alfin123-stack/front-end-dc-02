@@ -6,44 +6,23 @@ import {
   FaCode,
   FaTrophy,
   FaInfoCircle,
-  FaSun,
-  FaMoon,
-  FaCogs,
 } from "react-icons/fa";
 import { FiSend, FiArrowRight } from "react-icons/fi";
 
 import OptionItem from "./quizScreen/OptionItem";
 import FeedbackBox from "./quizScreen/FeedbackBox";
 import StatCard from "./quizScreen/StatCard";
-import { useNavigate } from "react-router-dom";
 
-export default function QuizScreen({
-  data,
-  settings,
-  onAnswer,
-  onNext,
-  onFinish,
-  onToggleTheme,
-}) {
-  const navigate = useNavigate();
+export default function QuizScreen({ data, onAnswer, onNext, onFinish }) {
   const [showResult, setShowResult] = useState(false);
 
   const { tutorial, quizData, currentQuestion, userAnswers, timeLeft } = data;
 
   const q = quizData[currentQuestion];
-  console.log(q);
   const selected = userAnswers[currentQuestion] || [];
 
-  /* ==========================================================
-     UPDATE ANSWER (Redux)
-  ========================================================== */
-  const updateAnswer = (arr) => {
-    onAnswer(arr); // ← langsung kirim ke Redux
-  };
+  const updateAnswer = (arr) => onAnswer(arr);
 
-  /* ==========================================================
-     TOGGLE OPTION
-  ========================================================== */
   const toggleSelect = (key) => {
     if (showResult) return;
 
@@ -58,92 +37,33 @@ export default function QuizScreen({
     updateAnswer([...selected.slice(1), key]);
   };
 
-  /* ==========================================================
-     SUBMIT ANSWER (SHOW RESULT)
-  ========================================================== */
   const handleSubmit = () => setShowResult(true);
 
-  /* ==========================================================
-     NEXT QUESTION OR FINISH QUIZ
-  ========================================================== */
   const handleNext = () => {
     setShowResult(false);
-
-    if (currentQuestion < quizData.length - 1) {
-      onNext(); // ← Redux next question
-    } else {
-      onFinish(); // ← lengkapin quiz
-    }
+    currentQuestion < quizData.length - 1 ? onNext() : onFinish();
   };
 
   const progress = ((currentQuestion + 1) / quizData.length) * 100;
   const allowSubmit = selected.length > 0;
 
   return (
-    <div
-      className="
-        min-h-screen 
-        bg-[#E9EEFF] dark:bg-gray-900 
-        text-gray-900 dark:text-white
-        transition-colors duration-300 rounded-xl
-      ">
-      <div
-        className="
-          w-full mx-auto 
-          max-w-4xl
-          px-4 sm:px-6 lg:px-8 
-          py-6
-        ">
-        {/* SETTINGS BUTTON */}
-        <div className="fixed top-6 right-6 z-50">
-          <button
-            onClick={() => navigate("/settings")}
-            className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 border shadow-lg hover:scale-110 transition">
-            <FaCogs size={22} />
-          </button>
-        </div>
-
-        {/* THEME BUTTON */}
-        <div className="fixed top-6 left-6 z-50">
-          <button
-            onClick={onToggleTheme}
-            className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 border shadow-lg hover:scale-110 transition">
-            {settings.theme === "dark" ? (
-              <FaMoon size={22} />
-            ) : (
-              <FaSun size={22} />
-            )}
-          </button>
-        </div>
-
+    <div className="min-h-screen bg-[#E9EEFF] dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+      <div className="w-full mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
         {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.4 }}
           className="flex flex-col items-center py-8 sm:py-10">
-          {/* Title */}
-          <h1
-            className="
-              flex items-center gap-2 sm:gap-3 
-              text-2xl sm:text-3xl lg:text-4xl 
-              font-bold tracking-wide text-center
-            ">
+          <h1 className="flex items-center gap-3 text-3xl sm:text-4xl font-bold tracking-wide text-center">
             <FaCode className="text-blue-500" />
             <span>{tutorial?.title}</span>
             <FaTrophy className="text-yellow-400" />
           </h1>
 
-          {/* Difficulty */}
-          <div
-            className="
-              mt-3 px-3 sm:px-4 py-1.5 
-              rounded-full 
-              text-xs sm:text-sm font-semibold 
-              bg-gray-100 dark:bg-gray-800 
-              border border-gray-300 dark:border-gray-700
-            ">
-            <span className="opacity-70">Tingkat Kesulitan:</span>{" "}
+          <div className="mt-3 px-4 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-sm font-semibold border border-gray-300 dark:border-gray-700">
+            <span className="opacity-70">Tingkat Kesulitan: </span>
             <span className="capitalize text-blue-600 dark:text-blue-400">
               {q.difficulty}
             </span>
@@ -151,14 +71,7 @@ export default function QuizScreen({
         </motion.div>
 
         {/* STATS */}
-        <div
-          className="
-            grid grid-cols-2 
-            gap-3 sm:gap-4 
-            max-w-3xl mx-auto 
-            px-2 sm:px-4 
-            mb-6
-          ">
+        <div className="grid grid-cols-2 gap-4 max-w-3xl mx-auto px-2 mb-6">
           <StatCard
             icon={<FaClock />}
             label="Sisa Waktu"
@@ -174,8 +87,8 @@ export default function QuizScreen({
           />
         </div>
 
-        {/* PROGRESS BAR */}
-        <div className="max-w-3xl mx-auto px-2 sm:px-4 mb-6">
+        {/* PROGRESS */}
+        <div className="max-w-3xl mx-auto px-2 mb-6">
           <div className="flex justify-between text-xs sm:text-sm mb-1">
             <span>
               Pertanyaan {currentQuestion + 1} dari {quizData.length}
@@ -194,30 +107,16 @@ export default function QuizScreen({
           </div>
         </div>
 
-        {/* QUESTION BLOCK */}
+        {/* QUESTION */}
         <motion.div
           key={currentQuestion}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className={`
-            max-w-3xl mx-auto 
-            p-5 sm:p-7 
-            rounded-xl border shadow-md
-            ${
-              settings.theme === "dark"
-                ? "bg-[#111827] border-gray-700 shadow-black/20"
-                : "bg-white border-gray-200 shadow-gray-200/60"
-            }
-          `}>
-          {/* Question */}
+          className="max-w-3xl mx-auto p-6 sm:p-7 rounded-xl border shadow-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          {/* Question Title */}
           <div className="flex items-start gap-3 mb-6">
-            <div
-              className="
-                p-2.5 rounded-lg 
-                bg-blue-50 dark:bg-blue-900/30 
-                text-blue-600 dark:text-blue-300
-              ">
+            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300">
               <FaInfoCircle className="text-xl" />
             </div>
 
@@ -256,47 +155,30 @@ export default function QuizScreen({
             })}
           </div>
 
-          {/* CTA BUTTON */}
+          {/* CTA */}
           <div className="mt-10 text-center">
             {!showResult ? (
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                transition={{ duration: 0.08 }}
                 onClick={handleSubmit}
                 disabled={!allowSubmit}
-                className={`
-                  inline-flex items-center gap-2 
-                  px-6 sm:px-8 py-3 
-                  rounded-xl text-white 
-                  font-semibold tracking-wide
-                  transition-all duration-300
+                className={`inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-semibold
                   ${
                     allowSubmit
                       ? "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
-                      : "bg-gray-400 cursor-not-allowed opacity-80"
-                  }
-                `}>
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}>
                 <FiSend className="text-lg" />
-                <span>Submit Jawaban</span>
+                Submit Jawaban
               </motion.button>
             ) : (
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                transition={{ duration: 0.08 }}
                 onClick={handleNext}
-                className="
-                  inline-flex items-center gap-2 
-                  px-6 sm:px-8 py-3 
-                  rounded-xl text-white 
-                  font-semibold tracking-wide
-                  bg-blue-600 hover:bg-blue-700 
-                  shadow-md hover:shadow-lg
-                ">
-                <span>
-                  {currentQuestion < quizData.length - 1
-                    ? "Lanjut Soal Berikutnya"
-                    : "Selesai"}
-                </span>
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-semibold bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg">
+                {currentQuestion < quizData.length - 1
+                  ? "Lanjut Soal Berikutnya"
+                  : "Selesai"}
                 <FiArrowRight className="text-lg" />
               </motion.button>
             )}

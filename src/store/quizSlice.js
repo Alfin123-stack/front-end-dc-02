@@ -45,18 +45,38 @@ export const loadQuiz = createAsyncThunk(
       const id = Number(tutorialId);
       const { quiz } = getState();
 
+      // ==============================
+      // CEK CACHE DARI REDUX STORE
+      // ==============================
       const cached = quiz.session[id];
       if (cached?.quizData && cached?.tutorial && cached?.meta) {
-        return { fromLocal: true, tutorialId: id, data: cached };
+        return {
+          fromLocal: true,
+          tutorialId: id,
+          data: cached,
+        };
       }
 
-      const res = await axios.post(
-        "https://backend-dc-02.vercel.app/api/ai/generate",
-        { tutorialId: id },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      // ==============================
+      // FETCH DATA DARI BACKEND
+      // ==============================
+      let res;
 
-      if (!res.data.success) throw new Error("Gagal memuat soal");
+      try {
+        res = await axios.post(
+          "https://backend-dc-02.vercel.app/api/ai/generate",
+          { tutorialId: id },
+          { headers: { "Content-Type": "application/json" } }
+        );
+      } catch (networkErr) {
+        return rejectWithValue("Gagal menghubungi server. Coba lagi.");
+      }
+
+      if (!res?.data?.success) {
+        return rejectWithValue(
+          res?.data?.message || "Server mengembalikan data tidak valid"
+        );
+      }
 
       return {
         fromLocal: false,
@@ -68,7 +88,7 @@ export const loadQuiz = createAsyncThunk(
         },
       };
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err?.message || "Terjadi kesalahan");
     }
   }
 );

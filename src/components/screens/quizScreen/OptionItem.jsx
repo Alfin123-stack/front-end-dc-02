@@ -27,15 +27,15 @@ export default function OptionItem({
             : "border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700/60"
         }
       `}>
-      {/* Ripple subtle effect */}
+      {/* Ripple tap effect */}
       <span
         className="
-          absolute inset-0 opacity-0 group-active:opacity-100 
+          absolute inset-0 opacity-0 group-active:opacity-100
           bg-blue-300/20 dark:bg-blue-700/20 transition-all duration-[180ms]
         "
       />
 
-      {/* Modern glowing left bar */}
+      {/* Glowing Left Bar */}
       <AnimatePresence>
         {isSelected && (
           <motion.div
@@ -46,7 +46,7 @@ export default function OptionItem({
             className="
               absolute left-0 top-0 h-full w-1.5 
               bg-blue-600 dark:bg-blue-500 rounded-r-lg
-              shadow-[0_0_12px_2px_rgba(59,130,246,0.5)]
+              shadow-[0_0_10px_2px_rgba(59,130,246,0.45)]
             "
           />
         )}
@@ -55,12 +55,11 @@ export default function OptionItem({
       {/* CONTENT */}
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
-          {/* Icon animation */}
+          {/* Icon Animation */}
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.2 }}>
-            {/* Checkbox for multiple */}
+            transition={{ duration: 0.22 }}>
             {isMultipleAnswer ? (
               isSelected ? (
                 <FaCheckSquare className="text-blue-600 dark:text-blue-400 text-2xl" />
@@ -74,7 +73,7 @@ export default function OptionItem({
             )}
           </motion.div>
 
-          {/* Option text */}
+          {/* Option Text */}
           <span
             className="
               font-semibold text-gray-900 dark:text-gray-200 
