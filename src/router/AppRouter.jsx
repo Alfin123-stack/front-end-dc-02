@@ -8,11 +8,9 @@ import CompletionPage from "../pages/CompletionPage";
 import ReviewPage from "../pages/ReviewPage";
 import SettingsPage from "../pages/SettingsPage";
 import Layout from "../components/Layout";
-<<<<<<< HEAD
-=======
+
 import HistoryScreen from "../components/screens/HistoryScreen";
 import HistoryDetailScreen from "../components/screens/HistoryDetailScreen";
->>>>>>> 66c974b (adding history screen)
 
 export default function AppRouter() {
   const location = useLocation();
