@@ -1,0 +1,84 @@
+/* =====================================
+   TAILWIND IMPORT (WAJIB URUT BEGINI)
+===================================== */
+@tailwind base;
+@tailwind components;
+
+/* =====================================
+   CUSTOM STYLES
+===================================== */
+
+/* LAYOUT WIDTH */
+.screen-mediumWidth {
+  max-width: 850px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.screen-fullWidth {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* FONT FAMILY */
+.font-default {
+  font-family: Arial, sans-serif !important;
+}
+
+.font-serif {
+  font-family: "Georgia", serif !important;
+}
+
+.font-open-dyslexic {
+  font-family: "Open-Dyslexic", sans-serif !important;
+}
+
+/* =====================================
+   GLOBAL FONT SCALE (ROOT)
+===================================== */
+
+/* default (medium) */
+:root {
+  --font-scale: 1;
+}
+
+/* small */
+.font-small {
+  --font-scale: 0.90 !important;
+}
+
+/* medium */
+.font-medium {
+  --font-scale: 1 !important;
+}
+
+/* large */
+.font-large {
+  --font-scale: 1.15 !important;
+}
+
+/* apply to all text in app */
+html, body {
+  font-size: calc(16px * var(--font-scale)) !important;
+}
+
+
+/* TOASTER THEME */
+:root {
+  --toast-bg: #ffffff;
+  --toast-text: #111827;
+  --toast-border: rgba(0, 0, 0, 0.15);
+}
+
+/* =====================================
+   TAILWIND DARK VARIANT
+===================================== */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =====================================
+   TAILWIND UTILITIES
+===================================== */
+@tailwind utilities;
