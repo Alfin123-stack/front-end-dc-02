@@ -6,10 +6,6 @@ import { motion } from "framer-motion";
 import { htmlToText } from "html-to-text";
 import React from "react";
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 66c974b (adding history screen)
 export default function FeedbackBox({ isCorrect, explanation }) {
   // Convert HTML → plain text
   const cleanExplanation = explanation
@@ -65,22 +61,14 @@ export default function FeedbackBox({ isCorrect, explanation }) {
         <div>
           <p
             className={`
-<<<<<<< HEAD
-              text-lg md:text-xl font-bold
-=======
-              text-base md:text-lg font-bold
->>>>>>> 66c974b (adding history screen)
+              text-base font-bold
               ${
                 isCorrect
                   ? "text-green-800 dark:text-green-300"
                   : "text-red-800 dark:text-red-300"
               }
             `}>
-<<<<<<< HEAD
-            {isCorrect ? "Jawaban Tepat! 🎉" : "Jawaban Belum Tepat 😥"}
-=======
             {isCorrect ? "Jawaban Tepat!" : "Jawaban Belum Tepat"}
->>>>>>> 66c974b (adding history screen)
           </p>
 
           <span
@@ -89,11 +77,7 @@ export default function FeedbackBox({ isCorrect, explanation }) {
               shadow-sm
               ${isCorrect ? "bg-green-600 text-white" : "bg-red-600 text-white"}
             `}>
-<<<<<<< HEAD
-            {isCorrect ? "CORRECT" : "INCORRECT"}
-=======
             {isCorrect ? "Benar" : "Salah"}
->>>>>>> 66c974b (adding history screen)
           </span>
         </div>
       </div>
@@ -107,19 +91,15 @@ export default function FeedbackBox({ isCorrect, explanation }) {
 
         <div
           className="
-            flex-1 leading-relaxed
-            text-gray-800 dark:text-gray-100
-            bg-white/80 dark:bg-gray-800/50
-            p-4 rounded-xl
-            border border-gray-200 dark:border-gray-700
-            shadow-sm
-          ">
+          flex-1 leading-relaxed
+          text-gray-800 dark:text-gray-100
+          bg-white/80 dark:bg-gray-800/50
+          p-4 rounded-xl
+          border border-gray-200 dark:border-gray-700
+          shadow-sm
+        ">
           {cleanExplanation ? (
-<<<<<<< HEAD
-            <p className="text-sm md:text-base">
-=======
             <p className="text-sm">
->>>>>>> 66c974b (adding history screen)
               <span className="font-semibold">Penjelasan: </span>
               {cleanExplanation}
             </p>
@@ -142,13 +122,8 @@ export default function FeedbackBox({ isCorrect, explanation }) {
           }
         `}>
         {isCorrect
-<<<<<<< HEAD
-          ? "Mantap! Pertahankan ritmemu 🔥"
-          : "Belum tepat, tapi kamu pasti bisa! Coba lagi ya 💪"}
-=======
           ? "Mantap! Pertahankan ritmemu"
           : "Belum tepat, tapi kamu pasti bisa! Coba lagi ya"}
->>>>>>> 66c974b (adding history screen)
       </p>
     </motion.div>
   );

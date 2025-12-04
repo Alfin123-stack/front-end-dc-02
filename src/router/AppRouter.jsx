@@ -31,14 +31,10 @@ export default function AppRouter() {
             <Route path="/completion/:level" element={<CompletionPage />} />
             <Route path="/review/:level" element={<ReviewPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-<<<<<<< HEAD
-=======
             {/* History List */}
             <Route path="/history" element={<HistoryScreen />} />
-
             {/* History Detail */}
             <Route path="/history/:id" element={<HistoryDetailScreen />} />
->>>>>>> 66c974b (adding history screen)
             <Route path="*" element={<StartPage />} />
           </Routes>
         </Layout>

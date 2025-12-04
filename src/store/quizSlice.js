@@ -6,15 +6,10 @@ import {
 import axios from "axios";
 
 /* -----------------------------
-   normalize helper
------------------------------ */
-
-/* -----------------------------
    localStorage QUIZ CACHE helper
 ----------------------------- */
-const saveQuizCache = (tutorialId, data) => {
+const saveQuizCache = (tutorialId, data) =>
   localStorage.setItem(`quiz_cache_${tutorialId}`, JSON.stringify(data));
-};
 
 const loadQuizCache = (tutorialId) => {
   const json = localStorage.getItem(`quiz_cache_${tutorialId}`);
@@ -26,13 +21,15 @@ const loadQuizCache = (tutorialId) => {
   }
 };
 
+/* -----------------------------
+   Normalize quiz helper
+----------------------------- */
 const normalizeQuiz = (quizList = []) => {
   if (!Array.isArray(quizList)) return [];
 
   return quizList
     .map((q) => {
       const rawOptions = q.options || {};
-
       const opts = Object.entries(rawOptions).map(([key, opt]) => ({
         key,
         text: opt?.text ?? "",
@@ -63,34 +60,19 @@ export const loadQuiz = createAsyncThunk(
       const id = Number(tutorialId);
       const { quiz } = getState();
 
-      /* -----------------------------
-         1. CEK LOCALSTORAGE
-      ----------------------------- */
+      // 1. CEK LOCALSTORAGE
       const localCache = loadQuizCache(id);
-
       if (localCache?.quizData && localCache?.tutorial && localCache?.meta) {
-        return {
-          fromLocal: true,
-          tutorialId: id,
-          data: localCache,
-        };
+        return { fromLocal: true, tutorialId: id, data: localCache };
       }
 
-      /* -----------------------------
-         2. CEK REDUX SESSION CACHE
-      ----------------------------- */
+      // 2. CEK SESSION CACHE
       const cached = quiz.session[id];
       if (cached?.quizData && cached?.tutorial && cached?.meta) {
-        return {
-          fromLocal: true,
-          tutorialId: id,
-          data: cached,
-        };
+        return { fromLocal: true, tutorialId: id, data: cached };
       }
 
-      /* -----------------------------
-         3. FETCH API
-      ----------------------------- */
+      // 3. FETCH API
       let res;
       try {
         res = await axios.post(
@@ -114,16 +96,10 @@ export const loadQuiz = createAsyncThunk(
         quizData: normalizeQuiz(res.data.quiz),
       };
 
-      /* -----------------------------
-         4. SIMPAN CACHE → LOCALSTORAGE
-      ----------------------------- */
+      // 4. SIMPAN CACHE → LOCALSTORAGE
       saveQuizCache(id, normalized);
 
-      return {
-        fromLocal: false,
-        tutorialId: id,
-        data: normalized,
-      };
+      return { fromLocal: false, tutorialId: id, data: normalized };
     } catch (err) {
       return rejectWithValue(err?.message || "Terjadi kesalahan");
     }
@@ -167,33 +143,24 @@ const quizSlice = createSlice({
     startQuiz(state) {
       state.quizStarted = true;
     },
-<<<<<<< HEAD
-    resetQuiz(state) {
-      return { ...initialState, session: state.session };
-=======
     resetQuiz(state, action) {
       const tutorialId = action.payload;
 
-      // HAPUS PROGRESS USER
+      // RESET PROGRESS & SCORE
       state.userAnswers = [];
       state.currentQuestion = 0;
       state.timeLeft = 30;
       state.quizStarted = false;
-
-      // HAPUS SCORE
       state.score = 0;
       state.totalQuestions = 0;
 
-      // GANTI quizData MENGGUNAKAN session cache agar tidak fetch ulang
+      // Ambil quizData dari session cache jika ada
       const cached = state.session[tutorialId];
       if (cached) {
         state.quizData = cached.quizData || [];
         state.tutorial = cached.tutorial || null;
         state.meta = cached.meta || null;
       }
-
-      // TIDAK reset session!
->>>>>>> 66c974b (adding history screen)
     },
 
     // SIMPAN jawaban user
@@ -216,10 +183,7 @@ const quizSlice = createSlice({
     saveSession(state, action) {
       const { tutorialId, data } = action.payload;
       const id = Number(tutorialId);
-      state.session[id] = {
-        ...(state.session[id] || {}),
-        ...data,
-      };
+      state.session[id] = { ...(state.session[id] || {}), ...data };
     },
 
     /* -----------------------------
@@ -244,11 +208,9 @@ const quizSlice = createSlice({
     loadProgress(state, action) {
       const { tutorialId, userId } = action.payload;
       const key = `quiz_progress_${tutorialId}_${userId}`;
-
       const saved = localStorage.getItem(key);
       if (saved) {
         const data = JSON.parse(saved);
-
         state.currentQuestion = data.currentQuestion ?? 0;
         state.userAnswers = data.userAnswers ?? [];
         state.timeLeft = data.timeLeft ?? state.timeLeft;
@@ -260,27 +222,23 @@ const quizSlice = createSlice({
     ----------------------------- */
     clearProgress(state, action) {
       const { tutorialId, userId } = action.payload;
-
-      // Hapus progress
       localStorage.removeItem(`quiz_progress_${tutorialId}_${userId}`);
-
-      // Hapus quiz cache juga
       localStorage.removeItem(`quiz_cache_${tutorialId}`);
     },
-<<<<<<< HEAD
-=======
 
+    /* -----------------------------
+       SAVE HISTORY
+    ----------------------------- */
     saveHistory(state, action) {
       const { tutorialId, quizData, userAnswers, score, totalQuestions } =
         action.payload;
 
       const key = "quiz_history";
 
-      // ambil existing history
       const existing = JSON.parse(localStorage.getItem(key) || "[]");
 
       const newRecord = {
-        id: Date.now(), // unique id
+        id: Date.now(),
         tutorialId,
         quizData,
         userAnswers,
@@ -290,11 +248,8 @@ const quizSlice = createSlice({
         timestamp: new Date().toISOString(),
       };
 
-      const updated = [newRecord, ...existing];
-
-      localStorage.setItem(key, JSON.stringify(updated));
+      localStorage.setItem(key, JSON.stringify([newRecord, ...existing]));
     },
->>>>>>> 66c974b (adding history screen)
   },
 
   extraReducers: (builder) => {
@@ -303,12 +258,10 @@ const quizSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-
       .addCase(loadQuiz.fulfilled, (state, action) => {
         const { fromLocal, tutorialId, data } = action.payload;
 
         state.isLoading = false;
-
         state.tutorial = data.tutorial;
         state.meta = data.meta;
         state.quizData = data.quizData;
@@ -325,7 +278,6 @@ const quizSlice = createSlice({
           };
         }
       })
-
       .addCase(loadQuiz.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
@@ -333,16 +285,15 @@ const quizSlice = createSlice({
   },
 });
 
+/* -----------------------------
+   Selectors
+----------------------------- */
 export const selectScore = createSelector(
   (state) => state.quiz.score,
   (state) => state.quiz.totalQuestions,
-  (score, totalQuestions) => ({
-    score,
-    totalQuestions,
-  })
+  (score, totalQuestions) => ({ score, totalQuestions })
 );
-<<<<<<< HEAD
-=======
+
 export const loadHistory = () => {
   try {
     return JSON.parse(localStorage.getItem("quiz_history") || "[]");
@@ -350,7 +301,6 @@ export const loadHistory = () => {
     return [];
   }
 };
->>>>>>> 66c974b (adding history screen)
 
 export const {
   setTime,
@@ -360,10 +310,7 @@ export const {
   answerQuestion,
   nextQuestion,
   setScore,
-<<<<<<< HEAD
-=======
   saveHistory,
->>>>>>> 66c974b (adding history screen)
   saveSession,
   saveProgress,
   loadProgress,

@@ -77,13 +77,8 @@ export default function OptionItem({
           {/* Option Text */}
           <span
             className="
-<<<<<<< HEAD
-              font-semibold text-gray-900 dark:text-gray-200 
-              text-base md:text-lg leading-snug
-=======
                font-normal text-gray-900 dark:text-gray-200 
               text-sm leading-snug
->>>>>>> 66c974b (adding history screen)
             ">
             {htmlToText(option.text || "")}
           </span>
