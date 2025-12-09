@@ -11,6 +11,12 @@ import {
 import { htmlToText } from "html-to-text";
 import { loadHistory } from "../../store/quizSlice";
 
+const getPercentColor = (p) => {
+  if (p <= 55) return "text-red-500";
+  if (p <= 80) return "text-yellow-500";
+  return "text-green-600";
+};
+
 export default function HistoryDetailScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,7 +38,8 @@ export default function HistoryDetailScreen() {
   }
 
   const { quizData, userAnswers, score, totalQuestions, timestamp } = item;
-  const percentage = Math.round((score / totalQuestions) * 100);
+  const percentage =
+    item.score > 1 ? Math.round(score) : Math.round(score * 100);
 
   return (
     <div className="min-h-screen bg-[#f7f9fc] dark:bg-[#0b1220] py-10">
@@ -52,25 +59,29 @@ export default function HistoryDetailScreen() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold dark:text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">
             Detail Riwayat Quiz
           </h1>
 
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            {timestamp ? new Date(timestamp).toLocaleString() : ""}
+            {timestamp
+              ? new Date(timestamp).toLocaleString("id-ID", {
+                  timeZone: "Asia/Jakarta",
+                  hour12: false,
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Waktu tidak tersedia"}
           </p>
-
-          <div className="text-lg sm:text-xl font-medium">
-            Skor:
-            <span className="text-[#155dfc] font-bold text-3xl mx-2">
-              {score}
-            </span>
-            <span>/{totalQuestions}</span>
-          </div>
 
           <p className="text-sm mt-2">
             Tingkat benar:{" "}
-            <span className="text-[#155dfc] font-semibold">{percentage}%</span>
+            <span className={`${getPercentColor(percentage)} font-semibold`}>
+              {percentage}%
+            </span>
           </p>
         </motion.div>
 
@@ -105,7 +116,9 @@ export default function HistoryDetailScreen() {
                     ) : (
                       <HiMiniXMark className="text-red-500 text-xl" />
                     )}
-                    <p className="font-semibold text-lg">Soal {i + 1}</p>
+                    <p className="font-semibold text-lg text-blue-600">
+                      Soal {i + 1}
+                    </p>
                   </div>
 
                   <span

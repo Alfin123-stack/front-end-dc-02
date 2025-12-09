@@ -1,3 +1,4 @@
+// CompletionScreen.jsx
 "use client";
 
 import React from "react";
@@ -5,14 +6,7 @@ import { useSelector } from "react-redux";
 import { selectScore } from "../../store/quizSlice";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  FaCheckCircle,
-  FaTimesCircle,
-  FaHome,
-  FaRedo,
-  FaBookOpen,
-  FaArrowRight,
-} from "react-icons/fa";
+import { HiBookOpen, HiArrowPath, HiArrowRight, HiHome } from "react-icons/hi2";
 
 export default function CompletionScreen() {
   const navigate = useNavigate();
@@ -24,162 +18,160 @@ export default function CompletionScreen() {
   const tutorialId = Number(query.get("tutorial") || 1);
   const user = query.get("user") || "";
 
-  const { score = 0, totalQuestions = 1 } = useSelector((state) =>
-    selectScore(state, tutorialId)
-  );
+  const { score = 0 } = useSelector((state) => selectScore(state, tutorialId));
+  const percentage = score <= 1 ? Math.round(score * 100) : Math.round(score);
 
-  const percentage = Math.round((score / totalQuestions) * 100) || 0;
-  const kkm = 60;
-  const isPassed = percentage >= kkm;
-  const canGoNextLevel = isPassed && levelNum < 3;
+  const color = percentage < 55 ? "red" : percentage < 80 ? "yellow" : "green";
 
-  // PROGRESS BAR COLOR LOGIC
-  const getColor = () => {
-    if (percentage < 60) return "bg-red-500";
-    if (percentage < 80) return "bg-yellow-500";
-    return "bg-green-500";
+  const colorHex = {
+    red: "#ef4444",
+    yellow: "#eab308",
+    green: "#22c55e",
   };
 
+  const colorText = {
+    red: "text-red-600 dark:text-red-400",
+    yellow: "text-yellow-500 dark:text-yellow-400",
+    green: "text-green-500 dark:text-green-400",
+  };
+
+  const canGoNextLevel = percentage >= 60 && levelNum < 3;
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="
-          w-full max-w-2xl rounded-3xl p-6 md:p-10
-          bg-white/75 dark:bg-gray-900/70
-          backdrop-blur-xl border border-white/40 dark:border-gray-800
-          shadow-xl
-        ">
-        {/* STATUS BADGE */}
-        <div className="flex flex-col items-center mb-10">
-          {isPassed ? (
-            <FaCheckCircle className="text-green-500 text-6xl mb-4" />
-          ) : (
-            <FaTimesCircle className="text-red-500 text-6xl mb-4" />
-          )}
-
-          <h1
-            className={`
-              text-3xl font-extrabold tracking-tight
-              ${
-                isPassed
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400"
-              }
-            `}>
-            {isPassed ? "Selamat! Kamu Lulus 🎉" : "Belum Lulus 😢"}
-          </h1>
-
-          <p className="mt-2 text-sm opacity-60">
-            KKM: {kkm} • Level {levelNum}
-          </p>
-        </div>
-
-        {/* SCORE BOX */}
-        <div
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 dark:from-[#0b1120] dark:to-[#0a0f1a] py-14 px-5 text-gray-900 dark:text-gray-200">
+      <div className="max-w-lg mx-auto">
+        {/* CARD */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
           className="
-            rounded-2xl p-6 mb-10 border shadow-md
-            bg-white dark:bg-gray-800
-            border-gray-200 dark:border-gray-700
+            p-10 rounded-3xl shadow-xl
+            bg-white/80 dark:bg-[#111827]/70 backdrop-blur-xl
+            border border-white/20 dark:border-gray-700/40
           ">
-          <h2 className="text-center text-lg font-medium mb-5 opacity-80">
-            Nilai Akhir Kamu
-          </h2>
+          {/* TITLE */}
+          <div className="text-center mb-8">
+            <h1 className={`text-3xl font-extrabold ${colorText[color]}`}>
+              Level {levelNum} Selesai
+            </h1>
 
-          <p
-            className={`
-              text-6xl font-black text-center mb-2
-              ${
-                isPassed
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400"
-              }
-            `}>
-            {percentage}%
-          </p>
-
-          <p className="text-center text-sm opacity-60">
-            {score} jawaban benar dari {totalQuestions} soal
-          </p>
-
-          {/* PROGRESS BAR */}
-          <div className="mt-6">
-            <div className="w-full bg-gray-300/40 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${percentage}%` }}
-                transition={{ duration: 0.9, ease: "easeOut" }}
-                className={`h-full rounded-full ${getColor()}`}
-              />
-            </div>
+            <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">
+              Berikut hasil latihan kamu
+            </p>
           </div>
-        </div>
 
-        {/* MESSAGE */}
-        <div className="text-center mb-10">
-          <p className="text-base opacity-80 leading-relaxed">
-            {isPassed
-              ? "Kerja bagus! Kamu sudah memahami materi ini dengan baik."
-              : "Tetap semangat! Pelajari lagi materinya, kamu pasti bisa."}
-          </p>
-        </div>
+          {/* SCORE RING */}
+          <div className="flex flex-col items-center mb-10">
+            <div className="relative w-40 h-40 flex items-center justify-center">
+              <svg
+                className="absolute transform -rotate-90"
+                width="170"
+                height="170">
+                <circle
+                  cx="85"
+                  cy="85"
+                  r="70"
+                  stroke="#e5e7eb"
+                  strokeWidth="12"
+                  fill="transparent"
+                />
+                <circle
+                  cx="85"
+                  cy="85"
+                  r="70"
+                  stroke={colorHex[color]}
+                  strokeWidth="12"
+                  fill="transparent"
+                  strokeDasharray={440}
+                  strokeDashoffset={440 - (440 * percentage) / 100}
+                  strokeLinecap="round"
+                  className="transition-[stroke-dashoffset] duration-700 ease-out"
+                />
+              </svg>
 
-        {/* ACTION BUTTONS */}
-        <div className="flex flex-col gap-4">
-          <button
-            onClick={() =>
-              navigate(
-                `/review/${levelNum}?tutorial=${tutorialId}&user=${user}`
-              )
-            }
-            className="
-              flex items-center justify-center gap-2 px-6 py-3 rounded-xl
-              bg-blue-600 hover:bg-blue-700 text-white font-semibold
-              transition-all shadow
-            ">
-            <FaBookOpen /> Review Jawaban
-          </button>
+              <p className={`text-4xl font-black ${colorText[color]}`}>
+                {percentage}%
+              </p>
+            </div>
 
-          <button
-            onClick={() =>
-              navigate(`/quiz/${levelNum}?tutorial=${tutorialId}&user=${user}`)
-            }
-            className="
-              flex items-center justify-center gap-2 px-6 py-3 rounded-xl
-              bg-yellow-500 hover:bg-yellow-600 text-white font-semibold
-              transition-all shadow
-            ">
-            <FaRedo /> Ulangi Quiz
-          </button>
+            <p className="text-sm mt-4 text-gray-700 dark:text-gray-300 text-center max-w-xs">
+              {percentage >= 80
+                ? "Sangat bagus! Kamu sudah paham betul materinya."
+                : percentage >= 60
+                ? "Lumayan! Kamu sudah memahami sebagian besar."
+                : "Belum maksimal, coba ulangi untuk hasil lebih baik."}
+            </p>
+          </div>
 
-          {canGoNextLevel && (
+          {/* BUTTONS */}
+          <div className="flex flex-col gap-3">
+            {/* REVIEW */}
             <button
               onClick={() =>
                 navigate(
-                  `/quiz/${levelNum + 1}?tutorial=${tutorialId}&user=${user}`
+                  `/review/${levelNum}?tutorial=${tutorialId}&user=${user}`
                 )
               }
               className="
-                flex items-center justify-center gap-2 px-6 py-3 rounded-xl
-                bg-green-600 hover:bg-green-700 text-white font-semibold
-                transition-all shadow
-              ">
-              <FaArrowRight /> Lanjut Level {levelNum + 1}
+      flex items-center justify-center gap-2 px-5 py-3 rounded-xl
+      bg-blue-600 hover:bg-blue-700 text-white font-semibold
+      transition shadow-sm
+    ">
+              <HiBookOpen className="text-lg" />
+              Review Jawaban
             </button>
-          )}
 
-          <button
-            onClick={() => navigate(`/?tutorial=${tutorialId}&user=${user}`)}
-            className="
-              flex items-center justify-center gap-2 px-5 py-3 rounded-xl
-              bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600
-              text-gray-800 dark:text-gray-200 font-medium transition-all
-            ">
-            <FaHome /> Kembali ke Beranda
-          </button>
-        </div>
-      </motion.div>
+            {/* ULANGI QUIZ */}
+            <button
+              onClick={() =>
+                navigate(
+                  `/quiz/${levelNum}?tutorial=${tutorialId}&user=${user}`
+                )
+              }
+              className="
+      flex items-center justify-center gap-2 px-5 py-3 rounded-xl
+      font-semibold transition shadow-sm
+      bg-gray-200 hover:bg-gray-300 text-gray-900
+      dark:bg-[#1f2937] dark:hover:bg-[#374151] dark:text-white
+    ">
+              <HiArrowPath className="text-lg" />
+              Ulangi Quiz
+            </button>
+
+            {/* NEXT LEVEL */}
+            {canGoNextLevel && (
+              <button
+                onClick={() =>
+                  navigate(
+                    `/quiz/${levelNum + 1}?tutorial=${tutorialId}&user=${user}`
+                  )
+                }
+                className="
+        flex items-center justify-center gap-2 px-5 py-3 rounded-xl
+        bg-indigo-600 hover:bg-indigo-700 text-white font-semibold
+        shadow-sm
+      ">
+                <HiArrowRight className="text-lg" />
+                Lanjut ke Level {levelNum + 1}
+              </button>
+            )}
+
+            {/* BACK HOME */}
+            <button
+              onClick={() => navigate(`/?tutorial=${tutorialId}&user=${user}`)}
+              className="
+      flex items-center justify-center gap-2 px-5 py-3 rounded-xl
+      bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold
+      dark:bg-[#1f2937] dark:hover:bg-[#374151] dark:text-white
+      transition shadow-sm
+    ">
+              <HiHome className="text-lg" />
+              Kembali ke Dashboard
+            </button>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

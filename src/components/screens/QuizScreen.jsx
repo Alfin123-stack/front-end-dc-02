@@ -1,5 +1,5 @@
 // src/components/screens/QuizScreen.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaClock, FaInfoCircle, FaLevelUpAlt } from "react-icons/fa";
 import { FiSend, FiArrowRight } from "react-icons/fi";
@@ -8,25 +8,48 @@ import { htmlToText } from "html-to-text";
 import OptionItem from "./quizScreen/OptionItem";
 import FeedbackBox from "./quizScreen/FeedbackBox";
 
-/* ---------- helpers ---------- */
 const getProgressColor = (p) => {
   if (p >= 80) return "bg-[#155dfc]";
   if (p >= 50) return "bg-green-500";
   return "bg-red-500";
 };
 
-export default function QuizScreen({ data, onAnswer, onNext, onFinish }) {
+export default function QuizScreen({
+  data,
+  onAnswer,
+  onNext,
+  onSubmit,
+  onFinish,
+}) {
   const [showResult, setShowResult] = useState(false);
   const [lockAction, setLockAction] = useState(false);
 
-  const { tutorial, quizData, currentQuestion, userAnswers, timeLeft } = data;
+  const {
+    tutorial,
+    quizData,
+    currentQuestion,
+    userAnswers,
+    timeLeft,
+    submittedState,
+  } = data;
+
   const q = quizData[currentQuestion];
   const selected = userAnswers[currentQuestion] || [];
 
-  /* Update answer */
+  /* --------------------------------------------------------------------------
+    RESTORE STATE (FIX UTAMA)
+    Jika soal ini sudah pernah disubmit, kita tampilkan feedback.
+    ❗ Penting: Tidak pernah reset showResult menjadi false.
+  -------------------------------------------------------------------------- */
+  useEffect(() => {
+    if (submittedState?.[currentQuestion]) {
+      setShowResult(true);
+    }
+  }, [currentQuestion, submittedState]);
+
+  /* ---------------- Update Answer ---------------- */
   const updateAnswer = (arr) => onAnswer(arr);
 
-  /* Select / unselect logic */
   const toggleSelect = (key) => {
     if (showResult) return;
 
@@ -34,24 +57,35 @@ export default function QuizScreen({ data, onAnswer, onNext, onFinish }) {
     const maxCorrect = q.correctAnswers?.length || 1;
     const already = selected.includes(key);
 
-    if (!isMultiple) return updateAnswer([key]);
+    if (!isMultiple) {
+      return updateAnswer([key]);
+    }
+
     if (already) return updateAnswer(selected.filter((v) => v !== key));
-    if (selected.length < maxCorrect) return updateAnswer([...selected, key]);
+
+    if (selected.length < maxCorrect) {
+      return updateAnswer([...selected, key]);
+    }
 
     updateAnswer([...selected.slice(1), key]);
   };
 
-  /* Submit */
+  /* ---------------- HANDLE SUBMIT ---------------- */
   const handleSubmit = () => {
     if (lockAction) return;
+
     setLockAction(true);
+
+    onSubmit(); // tandai soal sudah disubmit
     setShowResult(true);
+
     setTimeout(() => setLockAction(false), 300);
   };
 
-  /* Next or Finish */
+  /* ---------------- HANDLE NEXT / FINISH ---------------- */
   const handleNext = () => {
     if (lockAction) return;
+
     setLockAction(true);
     setShowResult(false);
 
@@ -63,11 +97,19 @@ export default function QuizScreen({ data, onAnswer, onNext, onFinish }) {
     }
   };
 
-  const progress = ((currentQuestion + 1) / quizData.length) * 100;
-  const allowSubmit = selected.length > 0;
+  /* ---------------- Submit Rules ---------------- */
+  const isMultiple = q.type === "multiple_answer";
+  const requiredAnswers = q.correctAnswers?.length || 1;
 
+  const allowSubmit = isMultiple
+    ? selected.length === requiredAnswers
+    : selected.length > 0;
+
+  /* ---------------- Timer ---------------- */
   const timeMinutes = Math.floor(timeLeft / 60);
   const timeSeconds = String(timeLeft % 60).padStart(2, "0");
+
+  const progress = ((currentQuestion + 1) / quizData.length) * 100;
 
   return (
     <div className="min-h-screen bg-[#f7f9fc] dark:bg-[#0b1220] py-10">
@@ -91,7 +133,6 @@ export default function QuizScreen({ data, onAnswer, onNext, onFinish }) {
             </div>
           </div>
 
-          {/* TIMER */}
           <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-white/60 dark:bg-white/10 border border-black/10 dark:border-white/10 backdrop-blur-md">
             <FaClock className="text-sm text-gray-700 dark:text-[#155dfc]" />
             <span
@@ -132,6 +173,7 @@ export default function QuizScreen({ data, onAnswer, onNext, onFinish }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
           className="p-7 rounded-3xl mb-8 bg-white/70 dark:bg-[#0f1a27]/40 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.06)]">
+          {/* QUESTION */}
           <div className="flex items-start gap-4 mb-6">
             <div className="p-2.5 rounded-xl bg-[#155dfc]/15 text-[#155dfc] shadow-sm">
               <FaInfoCircle className="text-xl" />
@@ -185,7 +227,7 @@ export default function QuizScreen({ data, onAnswer, onNext, onFinish }) {
             })}
           </div>
 
-          {/* ACTIONS */}
+          {/* ACTION BUTTONS */}
           <div className="mt-8 flex flex-col sm:flex-row items-center sm:justify-between gap-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Pilih jawaban lalu klik{" "}

@@ -1,4 +1,3 @@
-// src/pages/QuizPage.jsx
 import React, { useEffect, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,8 +13,11 @@ import {
   saveProgress,
   loadProgress,
   clearProgress,
-  resetQuiz,
   saveHistory,
+  submitQuestion,
+  loadProgressFromBackend,
+  saveProgressToBackend,
+  clearBackendQuiz,
 } from "../store/quizSlice";
 
 import QuizScreen from "../components/screens/QuizScreen";
@@ -25,12 +27,14 @@ export default function QuizPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const { level } = useParams();
 
+  const { level } = useParams();
   const currentLevel = Number(level);
-  const query = new URLSearchParams(location.search);
-  const tutorialId = Number(query.get("tutorial") || 1);
-  const userId = Number(query.get("user") || 1);
+
+  const tutorialId = Number(
+    new URLSearchParams(location.search).get("tutorial") || 1
+  );
+  const userId = Number(new URLSearchParams(location.search).get("user") || 1);
 
   const {
     isLoading,
@@ -40,16 +44,11 @@ export default function QuizPage() {
     quizStarted,
     timeLeft,
     currentQuestion,
+    submittedState,
+    error,
   } = useSelector((state) => state.quiz);
 
-  // Anti double-finish
   const hasFinished = useRef(false);
-
-  /* ----------------- RESET STATE SAAT MASUK ----------------- */
-  useEffect(() => {
-    dispatch(resetQuiz());
-    hasFinished.current = false;
-  }, [dispatch]);
 
   /* ----------------- SET TIME PER LEVEL ----------------- */
   useEffect(() => {
@@ -57,26 +56,61 @@ export default function QuizPage() {
     dispatch(setTime(levelTime[currentLevel] || 30));
   }, [currentLevel, dispatch]);
 
-  /* ----------------- LOAD DATA QUIZ ----------------- */
+  /* ==========================================================
+     LOAD QUIZ + LOAD PROGRESS (LOCAL + BACKEND)
+  ========================================================== */
   useEffect(() => {
-    dispatch(loadQuiz({ tutorialId }));
-  }, [tutorialId, dispatch]);
+    let mounted = true;
 
-  /* ----------------- LOAD PROGRESS JIKA QUIZ READY ----------------- */
-  useEffect(() => {
-    if (quizData.length > 0) {
-      dispatch(loadProgress({ tutorialId, userId }));
-    }
-  }, [quizData.length, tutorialId, userId, dispatch]);
+    (async () => {
+      try {
+        const localProgressKey = `quiz_progress_${tutorialId}_${userId}`;
+        const hasLocalProgress = Boolean(
+          localStorage.getItem(localProgressKey)
+        );
 
-  /* ----------------- AUTO START ----------------- */
-  useEffect(() => {
-    if (!quizStarted && quizData.length > 0) {
-      dispatch(startQuiz());
-    }
-  }, [quizStarted, quizData.length, dispatch]);
+        // 1. LOAD QUIZ
+        const res = await dispatch(
+          loadQuiz({ tutorialId, userId, force: false })
+        );
 
-  /* ----------------- TIMER ----------------- */
+        if (!mounted) return;
+
+        if (res.meta.requestStatus !== "fulfilled") {
+          console.warn("loadQuiz failed:", res.payload || res.error);
+          return;
+        }
+
+        // 2. LOAD PROGRESS LOCAL (JIKA ADA)
+        if (hasLocalProgress) {
+          dispatch(loadProgress({ tutorialId, userId }));
+        } else {
+          // 3. LOAD PROGRESS BACKEND (HANYA JIKA LOCAL TIDAK ADA)
+          const backendProgress = await dispatch(
+            loadProgressFromBackend({ tutorialId, userId })
+          );
+
+          if (backendProgress.meta.requestStatus === "fulfilled") {
+            // Jika dapat progress backend, apply ke local agar konsisten
+            dispatch(loadProgress({ tutorialId, userId }));
+          }
+        }
+
+        // 4. Mulai quiz
+        dispatch(startQuiz());
+      } catch (err) {
+        console.error("Error while loading quiz:", err);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [tutorialId, userId, dispatch]);
+
+  /* ==========================================================
+     TIMER
+  ========================================================== */
   useEffect(() => {
     if (!quizStarted) return;
 
@@ -85,30 +119,33 @@ export default function QuizPage() {
       return;
     }
 
-    const timer = setInterval(() => dispatch(tick()), 1000);
-    return () => clearInterval(timer);
+    const interval = setInterval(() => dispatch(tick()), 1000);
+    return () => clearInterval(interval);
   }, [quizStarted, timeLeft, dispatch]);
 
-  /* ----------------- FINISH QUIZ ----------------- */
+  /* ==========================================================
+     FINISH QUIZ
+  ========================================================== */
   const handleFinishQuiz = () => {
     if (hasFinished.current) return;
     hasFinished.current = true;
 
-    let score = 0;
-    quizData.forEach((q, i) => {
+    let rawScore = 0;
+
+    (quizData || []).forEach((q, i) => {
       const userAns = userAnswers[i] || [];
       const correct = q.correctAnswers || [];
 
       if (["multiple_choice", "true_false"].includes(q.type)) {
-        if (userAns[0] === correct[0]) score++;
+        if (userAns[0] === correct[0]) rawScore += 1;
       } else if (q.type === "multiple_answer") {
         const benar = userAns.filter((v) => correct.includes(v)).length;
-        const totalBenar = correct.length;
-        score += benar / totalBenar;
+        const totalBenar = correct.length || 1;
+        rawScore += benar / totalBenar;
       }
     });
 
-    const finalScore = Math.round(score);
+    const finalScore = Math.round((rawScore / (quizData.length || 1)) * 100);
 
     dispatch(setScore({ score: finalScore, totalQuestions: quizData.length }));
 
@@ -118,24 +155,37 @@ export default function QuizPage() {
         quizData,
         userAnswers,
         score: finalScore,
+        level: currentLevel,
         totalQuestions: quizData.length,
       })
     );
 
+    dispatch(clearBackendQuiz({ tutorialId, userId }));
+
+    // CLEAR LOCAL PROGRESS + QUIZ CACHE
     dispatch(clearProgress({ tutorialId, userId }));
 
+    // NAVIGATE
     navigate(
       `/completion/${currentLevel}?tutorial=${tutorialId}&user=${userId}`,
-      {
-        replace: true,
-      }
+      { replace: true }
     );
   };
 
-  /* ----------------- LOADING ----------------- */
+  /* ==========================================================
+     UI RENDER STATE
+  ========================================================== */
   if (isLoading) return <LoadingScreen />;
 
-  if (!quizData.length) {
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        Terjadi kesalahan: {String(error)}
+      </div>
+    );
+  }
+
+  if (!quizData || quizData.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">
         Soal tidak tersedia
@@ -151,10 +201,27 @@ export default function QuizPage() {
         userAnswers,
         timeLeft,
         currentQuestion,
+        submittedState,
       }}
       onGoHome={() => navigate("/")}
       onAnswer={(ans) => {
         dispatch(answerQuestion(ans));
+        dispatch(saveProgress({ tutorialId, userId }));
+        dispatch(
+          saveProgressToBackend({
+            tutorialId,
+            userId,
+            progress: {
+              currentQuestion,
+              userAnswers,
+              submittedState,
+              timeLeft,
+            },
+          })
+        );
+      }}
+      onSubmit={() => {
+        dispatch(submitQuestion());
         dispatch(saveProgress({ tutorialId, userId }));
       }}
       onNext={() => {
