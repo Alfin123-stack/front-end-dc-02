@@ -11,12 +11,29 @@ import {
 } from "react-icons/hi2";
 import { htmlToText } from "html-to-text";
 
+// Variants animasi halus
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+};
+
+const fadeLeft = {
+  hidden: { opacity: 0, x: -12 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.25 } },
+};
+
+const containerStagger = {
+  show: {
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
 export default function ReviewScreen({ data, onRestart, onBackToResult }) {
   const { quizData, userAnswers, score } = data;
 
   const percentage = score;
-
-  // Kondisi warna persentase
   const percentageColor =
     percentage <= 55
       ? "text-red-600"
@@ -25,21 +42,21 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
       : "text-green-600";
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-gray-50 dark:bg-[#0d1320] text-gray-900 dark:text-gray-200">
+    <div className="min-h-screen py-10 px-4 bg-gray-50 dark:bg-[#0d1320] text-gray-900 dark:text-gray-200">
       {/* HEADER */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
         className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-800 dark:text-gray-100">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
           Review Jawaban Kamu
         </h1>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          variants={fadeUp}
           className="mt-6 inline-flex flex-col items-center gap-2 bg-white dark:bg-[#111a2b]
-                     px-12 py-7 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                     px-10 py-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-700 dark:text-gray-400">
             Tingkat benar:{" "}
             <span className={`font-semibold ${percentageColor}`}>
@@ -49,8 +66,12 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
         </motion.div>
       </motion.div>
 
-      {/* CONTENT */}
-      <div className="max-w-3xl mx-auto space-y-10">
+      {/* LIST REVIEW */}
+      <motion.div
+        className="max-w-3xl mx-auto space-y-10"
+        variants={containerStagger}
+        initial="hidden"
+        animate="show">
         {quizData.map((q, i) => {
           const userAnswer = userAnswers[i] || [];
           const correctAnswers = q.correctAnswers || [];
@@ -62,9 +83,7 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
           return (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
+              variants={fadeUp}
               className="p-6 rounded-2xl bg-white dark:bg-[#111a2b]
                          border border-gray-200 dark:border-gray-700 shadow-md">
               {/* HEADER SOAL */}
@@ -77,7 +96,7 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
                   )}
 
                   <p className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                    Soal <span>{i + 1}</span>
+                    Soal {i + 1}
                   </p>
                 </div>
 
@@ -93,7 +112,7 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
               </div>
 
               {/* QUESTION */}
-              <p className="text-base font-medium text-gray-900 dark:text-gray-200 mb-4">
+              <p className="text-base font-medium mb-4">
                 {htmlToText(q.question)}
               </p>
 
@@ -115,9 +134,7 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
                   return (
                     <motion.div
                       key={opt.key}
-                      initial={{ opacity: 0, x: -6 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.18 }}
+                      variants={fadeLeft}
                       className={`p-4 rounded-xl border ${highlight}`}>
                       <div className="flex justify-between items-center mb-1">
                         <span className="font-medium">
@@ -138,14 +155,12 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
                         </div>
                       </div>
 
-                      {/* Feedback */}
                       {(isUser || isTrue) && opt.feedback && (
                         <motion.div
-                          initial={{ opacity: 0, y: 6 }}
+                          initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.18 }}
-                          className="mt-3 p-3 rounded-lg 
-                                     bg-white dark:bg-[#162036]
+                          transition={{ duration: 0.22 }}
+                          className="mt-3 p-3 rounded-lg bg-white dark:bg-[#162036]
                                      border border-gray-200 dark:border-gray-700">
                           <div className="flex gap-2">
                             {isTrue ? (
@@ -153,7 +168,7 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
                             ) : (
                               <HiMiniXCircle className="text-red-500 text-lg mt-0.5" />
                             )}
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                            <p className="text-sm">
                               {htmlToText(opt.feedback)}
                             </p>
                           </div>
@@ -170,26 +185,28 @@ export default function ReviewScreen({ data, onRestart, onBackToResult }) {
         {/* BUTTONS */}
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-14">
           <motion.button
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
             onClick={onBackToResult}
             className="px-7 py-3 font-semibold rounded-xl 
                        bg-gray-800 hover:bg-gray-900 text-white 
-                       shadow-md flex items-center gap-2">
+                       shadow-md flex items-center gap-2 transition-all">
             <HiArrowLeft />
             Kembali ke Hasil
           </motion.button>
 
           <motion.button
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
             onClick={onRestart}
             className="px-7 py-3 font-semibold rounded-xl
                        bg-blue-600 hover:bg-blue-700 text-white 
-                       shadow-md flex items-center gap-2">
+                       shadow-md flex items-center gap-2 transition-all">
             <HiArrowPath />
             Ulangi Quiz
           </motion.button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

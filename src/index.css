@@ -5,15 +5,17 @@
 @tailwind components;
 
 /* =====================================
-   CUSTOM STYLES
+   CUSTOM STYLES (ASLI + PERBAIKAN)
 ===================================== */
 
 /* LAYOUT WIDTH */
 .screen-mediumWidth {
-  max-width: 850px;
+  max-width: 780px !important; /* 850 → 780 supaya pas di iframe */
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .screen-fullWidth {
@@ -47,7 +49,7 @@
 
 /* small */
 .font-small {
-  --font-scale: 0.90 !important;
+  --font-scale: 0.9 !important;
 }
 
 /* medium */
@@ -60,13 +62,53 @@
   --font-scale: 1.15 !important;
 }
 
-/* apply to all text in app */
-html, body {
-  font-size: calc(16px * var(--font-scale)) !important;
+/* =====================================
+   GLOBAL FONT (FLEXIBLE FOR IFRAME)
+===================================== */
+
+/* 
+   FIX terbesar: font-size default terlalu besar ketika di iframe.
+   Solusi: turunkan base 16px → 15px
+   Tapi tetap memakai scale setting milik kamu.
+*/
+html,
+body {
+  font-size: calc(15px * var(--font-scale)) !important;
+  line-height: 1.45 !important;
+  overflow-x: hidden !important;
+  margin: 0;
+  padding: 0;
 }
 
+/* =====================================
+   OPTIMASI HEADING (BIAR NGGA KEGEDEAN)
+===================================== */
 
-/* TOASTER THEME */
+h1 {
+  font-size: calc(1.6rem * var(--font-scale)) !important; /* ~24px */
+  font-weight: 800 !important;
+}
+
+h2 {
+  font-size: calc(1.35rem * var(--font-scale)) !important; /* ~20-22px */
+  font-weight: 700 !important;
+}
+
+h3 {
+  font-size: calc(1.15rem * var(--font-scale)) !important;
+  font-weight: 600 !important;
+}
+
+p,
+li {
+  line-height: 1.45 !important;
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+/* =====================================
+   TOASTER THEME
+===================================== */
 :root {
   --toast-bg: #ffffff;
   --toast-text: #111827;

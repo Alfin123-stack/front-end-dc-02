@@ -9,17 +9,21 @@ import axios from "axios";
 /* =====================================================
    LOCAL STORAGE HELPERS
 ======================================================*/
-const quizCacheKey = (tutorialId, userId) =>
-  `quiz_cache_${tutorialId}_${userId}`;
-const progressKey = (tutorialId, userId) =>
-  `quiz_progress_${tutorialId}_${userId}`;
+const quizCacheKey = (userId, tutorialId, level) =>
+  `quiz_cache:${userId}:${tutorialId}:${level}`;
 
-const saveQuizCache = (tutorialId, userId, data) => {
-  localStorage.setItem(quizCacheKey(tutorialId, userId), JSON.stringify(data));
+const progressKey = (userId, tutorialId, level) =>
+  `quiz_progress:${userId}:${tutorialId}:${level}`;
+
+const saveQuizCache = (userId, tutorialId, level, data) => {
+  localStorage.setItem(
+    quizCacheKey(userId, tutorialId, level),
+    JSON.stringify(data)
+  );
 };
 
-const loadQuizCache = (tutorialId, userId) => {
-  const json = localStorage.getItem(quizCacheKey(tutorialId, userId));
+const loadQuizCache = (userId, tutorialId, level) => {
+  const json = localStorage.getItem(quizCacheKey(userId, tutorialId, level));
   if (!json) return null;
   try {
     return JSON.parse(json);
@@ -28,8 +32,8 @@ const loadQuizCache = (tutorialId, userId) => {
   }
 };
 
-const deleteLocalQuizCache = (tutorialId, userId) => {
-  localStorage.removeItem(quizCacheKey(tutorialId, userId));
+export const deleteLocalQuizCache = (userId, tutorialId, level) => {
+  localStorage.removeItem(quizCacheKey(userId, tutorialId, level));
 };
 
 /* =====================================================
@@ -69,97 +73,275 @@ export const loadHistory = () => {
 };
 
 /* =====================================================
+   SAVE QUIZ CACHE → BACKEND
+======================================================*/
+export const saveQuizCacheToBackend = createAsyncThunk(
+  "quiz/saveBackendQuizCache",
+  async ({ tutorialId, userId, level, quiz }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        "https://backend-dc-02.vercel.app/api/quiz/cache",
+        {
+          tutorialId,
+          userId,
+          level,
+          quiz,
+        }
+      );
+
+      if (!res?.data?.success) {
+        return rejectWithValue("Gagal menyimpan quiz cache ke server.");
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Save quiz cache error:", err.message);
+      return rejectWithValue("Gagal menyimpan quiz cache.");
+    }
+  }
+);
+
+/* =====================================================
+   LOAD TUTORIAL HEADING (Backend)
+======================================================*/
+export const loadTutorialHeading = createAsyncThunk(
+  "quiz/loadTutorialHeading",
+  async ({ tutorialId }, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        "https://backend-dc-02.vercel.app/api/tutorial/heading",
+        {
+          params: { tutorialId },
+        }
+      );
+
+      if (!res?.data?.success) {
+        return rejectWithValue("Gagal mendapatkan heading tutorial.");
+      }
+
+      return res.data.heading;
+    } catch (err) {
+      return rejectWithValue("Gagal menghubungi server (heading).");
+    }
+  }
+);
+
+/* =====================================================
    LOAD QUIZ (localStorage → backend CACHE → generate)
 ======================================================*/
 export const loadQuiz = createAsyncThunk(
   "quiz/loadQuiz",
-  async ({ tutorialId, userId, force = false }, { rejectWithValue }) => {
-    const tid = Number(tutorialId);
-
-    console.log("tutorial id", tutorialId);
-    console.log("user", userId);
-
+  async ({ tutorialId, userId, level }, { rejectWithValue }) => {
     try {
       // =====================================================
-      // 1. FORCE → DELETE LOCAL CACHE
+      // 0. NORMALISASI PARAMETER → KONVERSI KE ANGKA
       // =====================================================
-      // if (force) deleteLocalQuizCache(tid, userId);
+      const tutorialIDNum = Number(tutorialId);
+      const userIDNum = Number(userId);
+      const levelNum = Number(level);
 
-      // =====================================================
-      // 2. TRY READ FROM LOCAL STORAGE
-      // =====================================================
-      if (!force) {
-        const local = loadQuizCache(tid, userId);
-        if (local?.quizData) {
-          return {
-            fromLocal: true,
-            tutorialId: tid,
-            data: local,
-          };
-        }
+      // Validasi angka dasar
+      if (isNaN(tutorialIDNum) || isNaN(userIDNum) || isNaN(levelNum)) {
+        return rejectWithValue(
+          "Parameter tidak valid (ID atau level bukan angka)."
+        );
       }
 
       // =====================================================
-      // 3. TRY FETCH FROM BACKEND QUIZ CACHE
+      // 1. READ LOCAL CACHE DAHULU
       // =====================================================
-      let cacheRes = null;
+      const localCache = loadQuizCache(userIDNum, tutorialIDNum, levelNum);
+
+      if (localCache?.quizData) {
+        return {
+          fromLocal: true,
+          tutorialId: tutorialIDNum,
+          data: localCache,
+        };
+      }
+
+      // =====================================================
+      // 2. TRY GET BACKEND QUIZ CACHE
+      // =====================================================
+      let backendCacheRes = null;
+
       try {
-        cacheRes = await axios.get(
+        backendCacheRes = await axios.get(
           "https://backend-dc-02.vercel.app/api/quiz/cache",
           {
-            params: { tutorialId: tid, userId },
+            params: {
+              tutorialId: tutorialIDNum,
+              userId: userIDNum,
+              level: levelNum,
+            },
           }
         );
+
+        console.log("Backend quiz cache response:", backendCacheRes.data);
       } catch {}
 
-      if (cacheRes?.data?.success && cacheRes.data.quizCache) {
-        const d = {
-          tutorial: cacheRes.data.quizCache.tutorial,
-          meta: cacheRes.data.quizCache.meta,
-          quizData: normalizeQuiz(cacheRes.data.quizCache.quiz),
+      if (backendCacheRes?.data?.success && backendCacheRes.data.quizCache) {
+        const cache = backendCacheRes.data.quizCache;
+
+        console.log("Using backend quiz cache:", cache);
+
+        const backendData = {
+          tutorial: cache.tutorial,
+          meta: cache.meta,
+          quizData: normalizeQuiz(cache.quizData),
         };
-        saveQuizCache(tid, userId, d);
+
+        saveQuizCache(userIDNum, tutorialIDNum, levelNum, backendData);
 
         return {
           fromLocal: false,
-          tutorialId: tid,
-          data: d,
+          tutorialId: tutorialIDNum,
+          data: backendData,
         };
       }
 
       // =====================================================
-      // 4. BACKEND: GENERATE QUIZ BARU
+      // 3. BYPASS: PAKAI DATA QUIZ STATIC UNTUK DEVELOPMENT
       // =====================================================
-      let res;
-      try {
-        res = await axios.post(
-          "https://backend-dc-02.vercel.app/api/quiz/generate",
-          { tutorialId: tid },
-          { headers: { "Content-Type": "application/json" } }
-        );
-      } catch {
-        return rejectWithValue("Gagal menghubungi server.");
-      }
 
-      if (!res?.data?.success) {
-        return rejectWithValue(
-          res?.data?.message || "Server mengembalikan data tidak valid"
-        );
-      }
-
-      const normalized = {
-        tutorial: res.data.tutorial,
-        meta: res.data.meta,
-        quizData: normalizeQuiz(res.data.quiz),
+      const staticQuizResponse = {
+        success: true,
+        message: "Quiz generated successfully",
+        tutorial: {
+          id: 35363,
+          title: "Penerapan AI dalam Dunia Nyata",
+        },
+        meta: {
+          level: 1,
+          totalQuestions: 3,
+          multiple_choice: 3,
+          multiple_answer: 0,
+        },
+        quiz: [
+          {
+            question:
+              "Perangkat inovatif yang dilandasi oleh teknologi AI sehingga memiliki kemampuan untuk melakukan tugas berdasarkan perintah verbal...",
+            type: "multiple_choice",
+            options: {
+              A: {
+                text: "Self-driving car",
+                isCorrect: false,
+                feedback:
+                  "Self-driving car adalah mobil tanpa pengemudi, bukan perangkat yang merespon perintah verbal.",
+              },
+              B: {
+                text: "Robot industri",
+                isCorrect: false,
+                feedback:
+                  "Robot industri umumnya melakukan tugas fisik berulang, bukan merespon perintah verbal seperti Smart Speaker.",
+              },
+              C: {
+                text: "Smart Speaker",
+                isCorrect: true,
+                feedback:
+                  "Tepat sekali! Smart Speaker adalah perangkat berbasis AI yang merespons perintah verbal untuk melakukan berbagai tugas.",
+              },
+              D: {
+                text: "Pesawat tanpa awak (Drone)",
+                isCorrect: false,
+                feedback:
+                  "Pesawat tanpa awak (drone) adalah alat terbang yang dikendalikan dari jarak jauh atau secara otomatis, bukan perangkat verbal interaktif.",
+              },
+              E: {
+                text: "Printer 3D",
+                isCorrect: false,
+                feedback:
+                  "Printer 3D adalah perangkat untuk mencetak objek tiga dimensi, tidak berkaitan dengan perintah verbal.",
+              },
+            },
+          },
+          {
+            question:
+              "Salah satu komponen krusial pada Self-driving car adalah sensor yang berfungsi untuk mengukur jarak...",
+            type: "multiple_choice",
+            options: {
+              A: {
+                text: "Termometer",
+                isCorrect: false,
+                feedback: "Termometer mengukur suhu.",
+              },
+              B: {
+                text: "Barometer",
+                isCorrect: false,
+                feedback: "Barometer mengukur tekanan udara.",
+              },
+              C: {
+                text: "Higrometer",
+                isCorrect: false,
+                feedback: "Higrometer mengukur kelembaban.",
+              },
+              D: {
+                text: "LIDAR",
+                isCorrect: true,
+                feedback:
+                  "Benar! LIDAR adalah sensor yang digunakan self-driving car untuk mengukur jarak objek di sekitarnya.",
+              },
+              E: {
+                text: "Spektrometer",
+                isCorrect: false,
+                feedback: "Spektrometer menganalisis cahaya.",
+              },
+            },
+          },
+          {
+            question:
+              "Smart speaker memiliki kemampuan untuk menerima dan memproses perintah verbal...",
+            type: "multiple_choice",
+            options: {
+              A: {
+                text: "Computer Vision",
+                isCorrect: false,
+                feedback: "Digunakan untuk memahami gambar.",
+              },
+              B: {
+                text: "Machine Learning",
+                isCorrect: false,
+                feedback: "ML adalah konsep lebih umum.",
+              },
+              C: {
+                text: "Natural Language Processing (NLP)",
+                isCorrect: true,
+                feedback:
+                  "Betul! NLP adalah teknologi yang memungkinkan smart speaker memahami bahasa manusia.",
+              },
+              D: {
+                text: "RPA",
+                isCorrect: false,
+                feedback: "RPA mengotomatiskan tugas berbasis aturan.",
+              },
+              E: {
+                text: "Big Data Analytics",
+                isCorrect: false,
+                feedback: "Tidak digunakan untuk memahami bahasa.",
+              },
+            },
+          },
+        ],
       };
 
-      saveQuizCache(tid, userId, normalized);
+      const normalized = {
+        tutorial: staticQuizResponse.tutorial,
+        meta: staticQuizResponse.meta,
+        quizData: normalizeQuiz(staticQuizResponse.quiz),
+      };
+
+      // Simpan ke localStorage
+      saveQuizCache(userIDNum, tutorialIDNum, levelNum, normalized);
 
       return {
         fromLocal: false,
-        tutorialId: tid,
+        tutorialId: tutorialIDNum,
         data: normalized,
       };
+
+      // =====================================================
+      // (TIDAK ADA PEMANGGILAN /api/quiz/generate LAGI)
+      // =====================================================
     } catch (err) {
       return rejectWithValue(err?.message || "Terjadi kesalahan.");
     }
@@ -171,21 +353,25 @@ export const loadQuiz = createAsyncThunk(
 ======================================================*/
 export const loadProgressFromBackend = createAsyncThunk(
   "quiz/loadBackendProgress",
-  async ({ tutorialId, userId }, { rejectWithValue }) => {
+  async ({ tutorialId, userId, level }, { rejectWithValue }) => {
     try {
-      const local = localStorage.getItem(progressKey(tutorialId, userId));
+      const local = localStorage.getItem(
+        progressKey(userId, tutorialId, level)
+      );
       if (local) return JSON.parse(local);
 
       const res = await axios.get(
         "https://backend-dc-02.vercel.app/api/quiz/progress",
         {
-          params: { tutorialId, userId },
+          params: { tutorialId, userId, level },
         }
       );
 
+      console.log(res.data);
+
       if (res?.data?.progress) {
         localStorage.setItem(
-          progressKey(tutorialId, userId),
+          progressKey(userId, tutorialId, level),
           JSON.stringify(res.data.progress)
         );
         return res.data.progress;
@@ -203,28 +389,46 @@ export const loadProgressFromBackend = createAsyncThunk(
 ======================================================*/
 export const saveProgressToBackend = createAsyncThunk(
   "quiz/saveBackendProgress",
-  async ({ tutorialId, userId, progress }) => {
+  async ({ tutorialId, userId, level, progress }) => {
     try {
-      await axios.post("https://backend-dc-02.vercel.app/api/quiz/progress", {
-        tutorialId,
-        userId,
-        progress,
-      });
+      const save = await axios.post(
+        "https://backend-dc-02.vercel.app/api/quiz/progress",
+        {
+          tutorialId,
+          userId,
+          level,
+          progress,
+        }
+      );
+
+      console.log("progress", progress);
+      console.log(save.data);
     } catch {}
   }
 );
 
 /* =====================================================
-   CLEAR BACKEND CACHE + PROGRESS
+   CLEAR BACKEND CACHE + PROGRESS (DENGAN QUERY PARAMS)
 ======================================================*/
 export const clearBackendQuiz = createAsyncThunk(
   "quiz/clearBackend",
-  async ({ tutorialId, userId }) => {
+  async ({ tutorialId, userId, level, cache = true, progress = true }) => {
     try {
-      await axios.delete("https://backend-dc-02.vercel.app/api/quiz/clear", {
-        data: { tutorialId, userId },
-      });
-    } catch {}
+      const response = await axios.delete(
+        `https://backend-dc-02.vercel.app/api/quiz/clear?cache=${cache}&progress=${progress}`,
+        {
+          data: {
+            tutorialId,
+            userId,
+            level,
+          },
+        }
+      );
+
+      console.log("Clear backend quiz response:", response.data);
+    } catch (err) {
+      console.error("Failed to clear quiz:", err);
+    }
   }
 );
 
@@ -236,6 +440,7 @@ const initialState = {
   error: null,
 
   tutorial: null,
+  tutorialHeading: null,
   meta: null,
   quizData: [],
 
@@ -318,7 +523,7 @@ const quizSlice = createSlice({
 
     /* SAVE PROGRESS LOCAL + BACKEND */
     saveProgress(state, action) {
-      const { tutorialId, userId } = action.payload;
+      const { tutorialId, userId, level } = action.payload;
 
       const progress = {
         currentQuestion: state.currentQuestion,
@@ -328,16 +533,16 @@ const quizSlice = createSlice({
       };
 
       localStorage.setItem(
-        progressKey(tutorialId, userId),
+        progressKey(userId, tutorialId, level),
         JSON.stringify(progress)
       );
     },
 
     /* LOAD PROGRESS FROM LOCAL */
     loadProgress(state, action) {
-      const { tutorialId, userId } = action.payload;
+      const { tutorialId, userId, level } = action.payload;
 
-      const json = localStorage.getItem(progressKey(tutorialId, userId));
+      const json = localStorage.getItem(progressKey(userId, tutorialId, level));
       if (!json) return;
 
       const data = JSON.parse(json);
@@ -350,9 +555,8 @@ const quizSlice = createSlice({
 
     /* CLEAR LOCAL ONLY */
     clearProgress(state, action) {
-      const { tutorialId, userId } = action.payload;
-      localStorage.removeItem(progressKey(tutorialId, userId));
-      deleteLocalQuizCache(tutorialId, userId);
+      const { tutorialId, userId, level } = action.payload;
+      localStorage.removeItem(progressKey(userId, tutorialId, level));
     },
 
     saveHistory(state, action) {
@@ -391,20 +595,30 @@ const quizSlice = createSlice({
         state.error = null;
       })
       .addCase(loadQuiz.fulfilled, (state, action) => {
-        const { data } = action.payload;
+        console.log("Loaded quiz data:", action.payload);
 
         state.isLoading = false;
         state.quizLoaded = true;
 
-        state.tutorial = data.tutorial;
-        state.meta = data.meta;
-        state.quizData = data.quizData;
+        // FIX → ambil dari payload.data, bukan payload.quiz
+        const { data } = action.payload;
+
+        if (!data) {
+          console.warn("No quiz data found in payload:", action.payload);
+          state.error = "Data quiz tidak ditemukan.";
+          return;
+        }
+
+        state.tutorial = data.tutorial || null;
+        state.meta = data.meta || {};
+        state.quizData = data.quizData || [];
 
         state.currentQuestion = 0;
         state.userAnswers = [];
         state.submittedState = {};
         state.quizStarted = false;
       })
+
       .addCase(loadQuiz.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
@@ -418,6 +632,17 @@ const quizSlice = createSlice({
         state.userAnswers = data.userAnswers ?? [];
         state.submittedState = data.submittedState ?? {};
         state.timeLeft = data.timeLeft ?? 30;
+      })
+
+      // =============================================
+      // LOAD TUTORIAL HEADING
+      // =============================================
+      .addCase(loadTutorialHeading.fulfilled, (state, action) => {
+        state.tutorialHeading = action.payload;
+      })
+      .addCase(loadTutorialHeading.rejected, (state, action) => {
+        // Tidak mem-block quiz, jadi jangan set error global
+        console.warn("Failed to load heading:", action.payload);
       });
   },
 });
