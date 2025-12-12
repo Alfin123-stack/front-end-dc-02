@@ -1,0 +1,83 @@
+export const getProgressColor = (p) => {
+  if (p >= 80) return "bg-[#155dfc]";
+  if (p >= 50) return "bg-green-500";
+  return "bg-red-500";
+};
+
+export const levelColor = (lvl) => {
+  switch (lvl) {
+    case 1:
+      return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+    case 2:
+      return "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300";
+    case 3:
+      return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+    default:
+      return "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300";
+  }
+};
+
+export const getPercentColor = (p) => {
+  if (p <= 55) return "text-red-500";
+  if (p <= 80) return "text-yellow-500";
+  return "text-green-600";
+};
+
+export const formatTimestamp = (ts) => {
+  if (!ts) return "Waktu tidak tersedia";
+
+  return new Date(ts).toLocaleString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour12: false,
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+/* ===============================
+    SCORE HELPERS
+================================ */
+export const calcScorePercentage = (score) =>
+  score <= 1 ? Math.round(score * 100) : Math.round(score);
+
+export const scoreColorHex = {
+  red: "#ef4444",
+  yellow: "#eab308",
+  green: "#22c55e",
+};
+
+export const scoreColorText = {
+  red: "text-red-600 dark:text-red-400",
+  yellow: "text-yellow-500 dark:text-yellow-400",
+  green: "text-green-500 dark:text-green-400",
+};
+
+/* ===============================
+    LEVEL HELPERS
+================================ */
+export const allowNextLevel = (percentage, currentLevel) =>
+  percentage >= 60 && currentLevel < 3;
+
+export const getScoreColorName = (p) => {
+  if (p < 55) return "red";
+  if (p < 80) return "yellow";
+  return "green";
+};
+
+export const getFilteredHistory = (history, tutorialId) => {
+  return history.filter(
+    (item) => Number(item.tutorialId) === Number(tutorialId)
+  );
+};
+
+export const paginate = (items, page, limit) => {
+  const start = (page - 1) * limit;
+  return items.slice(start, start + limit);
+};
+
+export const getTotalPages = (items, limit) => {
+  return Math.ceil(items.length / limit);
+};

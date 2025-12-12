@@ -1,27 +1,30 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
-import {
-  loadQuiz,
-  startQuiz,
-  tick,
-  answerQuestion,
-  nextQuestion,
-  setTime,
-  setScore,
-  saveProgress,
-  loadProgress,
-  clearProgress,
-  saveHistory,
-  submitQuestion,
-  loadProgressFromBackend,
-  saveProgressToBackend,
-  clearBackendQuiz,
-} from "../store/quizSlice";
-
 import QuizScreen from "../components/screens/QuizScreen";
-import LoadingScreen from "./quiz/LoadingScreen";
+import LoadingScreen from "../components/LoadingScreen";
+
+import {
+  answerQuestion,
+  clearProgress,
+  loadProgress,
+  nextQuestion,
+  saveHistory,
+  saveProgress,
+  setScore,
+  setTime,
+  startQuiz,
+  submitQuestion,
+  tick,
+} from "../store/quiz/quizSlice";
+
+import {
+  clearBackendQuiz,
+  loadProgressFromBackend,
+  loadQuiz,
+  saveProgressToBackend,
+} from "../store/quiz/quizThunks";
 
 export default function QuizPage() {
   const navigate = useNavigate();
@@ -36,6 +39,7 @@ export default function QuizPage() {
   );
   const userId = Number(new URLSearchParams(location.search).get("user") || 1);
 
+  // Redux state
   const {
     isLoading,
     quizData,
@@ -46,181 +50,79 @@ export default function QuizPage() {
     currentQuestion,
     submittedState,
     error,
-  } = useSelector((state) => state.quiz);
+  } = useSelector((s) => s.quiz);
 
-  // flag to prevent autosave / other effects from racing while we restore state
-  const isRestoring = useRef(false);
-  const hasFinished = useRef(false);
+  // Flags
+  const restoring = useRef(true);
+  const autosaveReady = useRef(false);
+  const finishing = useRef(false);
+  const mounted = useRef(true);
 
-  /* ----------------- SET TIME PER LEVEL ----------------- */
+  const LS_KEY = `quiz_progress:${userId}:${tutorialId}:${currentLevel}`;
+
+  // Autosave internals
+  const pendingSave = useRef(null);
+  const saveTimer = useRef(null);
+  const saving = useRef(false);
+  const lastState = useRef("");
+
+  /* ==========================================================
+     SET TIME AWAL
+  ========================================================== */
   useEffect(() => {
-    const levelTime = {
-      1: 60,
-      2: 75,
-      3: 90,
-    };
+    if (quizStarted) return;
+    if (!restoring.current) return;
 
-    dispatch(setTime(levelTime[currentLevel] || 30));
-  }, [currentLevel, dispatch]);
+    const t = { 1: 60, 2: 75, 3: 90 };
+    dispatch(setTime(t[currentLevel] || 30));
+  }, [currentLevel, quizStarted]);
 
-  /* ================================================================
-     LOAD QUIZ + RESTORE PROGRESS (LOCAL → BACKEND)
-     - BLOCK autosave during restore using isRestoring ref
-     - Ensure this effect only runs when tutorialId/userId/level change
-  ================================================================ */
-  useEffect(() => {
-    let mounted = true;
+  /* ==========================================================
+     FINISH QUIZ
+  ========================================================== */
+  const handleFinish = useCallback(async () => {
+    if (finishing.current) return;
+    finishing.current = true;
 
-    (async () => {
+    // MATIKAN AUTOSAVE SEPENUHNYA
+    autosaveReady.current = false;
+    restoring.current = true;
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+
+    // Flush autosave terakhir
+    if (pendingSave.current && !saving.current) {
+      saving.current = true;
       try {
-        isRestoring.current = true; // start restoring block
-
-        const localKey = `quiz_progress:${userId}:${tutorialId}:${level}`;
-        const hasLocal = !!localStorage.getItem(localKey);
-
-        // 1. LOAD QUIZ (so normalizeQuiz etc. is ready)
-        const quizRes = await dispatch(loadQuiz({ tutorialId, userId, level }));
-        if (!mounted) return;
-
-        if (quizRes.meta.requestStatus !== "fulfilled") {
-          console.warn("loadQuiz failed:", quizRes.payload || quizRes.error);
-          isRestoring.current = false;
-          return;
-        }
-
-        // 2. IF LOCAL PROGRESS PRESENT -> LOAD IT
-        if (hasLocal) {
-          // loadProgress action is expected to read from localStorage (existing code)
-          dispatch(loadProgress({ tutorialId, userId, level }));
-          // give Redux a tick to apply loaded state
-          await new Promise((r) => setTimeout(r, 0));
-          if (!mounted) return;
-
-          dispatch(startQuiz());
-          isRestoring.current = false;
-          return;
-        }
-
-        // 3. ELSE TRY BACKEND -> if exists, write to local and load
-        const backend = await dispatch(
-          loadProgressFromBackend({ tutorialId, userId, level })
-        );
-
-        if (!mounted) return;
-
-        if (backend.meta.requestStatus === "fulfilled") {
-          // backend handler probably saved progress to localStorage already
-          dispatch(loadProgress({ tutorialId, userId, level }));
-          // ensure state applied
-          await new Promise((r) => setTimeout(r, 0));
-        }
-
-        // 4. START quiz (either fresh or restored)
-        dispatch(startQuiz());
-      } catch (err) {
-        console.error("Error while loading quiz:", err);
-      } finally {
-        // small delay to ensure any immediate subscriber effects don't see restoring=true too long
-        setTimeout(() => {
-          isRestoring.current = false;
-        }, 0);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [tutorialId, userId, level, dispatch]); // important dependencies
-
-  /* ================================================================
-     TIMER
-  ================================================================ */
-  useEffect(() => {
-    if (!quizStarted) return;
-
-    if (timeLeft <= 0) {
-      dispatch(
-        clearBackendQuiz({
-          tutorialId,
-          userId,
-          level,
-          cache: true,
-          progress: true,
-        })
-      );
-
-      handleFinishQuiz();
-      return;
+        await dispatch(
+          saveProgressToBackend({
+            tutorialId,
+            userId,
+            level: currentLevel,
+            progress: pendingSave.current,
+          })
+        ).unwrap();
+      } catch (_) {}
+      saving.current = false;
+      pendingSave.current = null;
     }
 
-    const interval = setInterval(() => dispatch(tick()), 1000);
-    return () => clearInterval(interval);
-  }, [quizStarted, timeLeft, dispatch, tutorialId, userId, level]);
-
-  /* ================================================================
-     AUTO-SAVE TO BACKEND (DEBOUNCE 300ms)
-     - Guarded: do not auto-save while isRestoring
-  ================================================================ */
-  useEffect(() => {
-    if (!quizStarted) return;
-    if (isRestoring.current) return; // avoid racing when restoring
-
-    const t = setTimeout(() => {
-      // double-check guard in timeout in case isRestoring changed
-      if (isRestoring.current) return;
-
-      dispatch(
-        saveProgressToBackend({
-          tutorialId,
-          userId,
-          level,
-          progress: {
-            currentQuestion,
-            userAnswers,
-            submittedState,
-            timeLeft,
-          },
-        })
-      );
-    }, 300);
-
-    return () => clearTimeout(t);
-    // include tutorialId/userId/level to ensure correct context
-  }, [
-    currentQuestion,
-    userAnswers,
-    submittedState,
-    quizStarted,
-    tutorialId,
-    userId,
-    level,
-    timeLeft,
-    dispatch,
-  ]);
-
-  /* ================================================================
-     FINISH QUIZ
-  ================================================================ */
-  const handleFinishQuiz = () => {
-    if (hasFinished.current) return;
-    hasFinished.current = true;
-
+    // Hitung score
     let raw = 0;
+    quizData.forEach((q, i) => {
+      const u = userAnswers[i] || [];
+      const c = q.correctAnswers || [];
 
-    (quizData || []).forEach((q, i) => {
-      const user = userAnswers[i] || [];
-      const correct = q.correctAnswers || [];
-
-      if (["multiple_choice", "true_false"].includes(q.type)) {
-        if (user[0] === correct[0]) raw += 1;
+      if (q.type === "multiple_choice" || q.type === "true_false") {
+        if (u[0] === c[0]) raw++;
       } else if (q.type === "multiple_answer") {
-        const benar = user.filter((v) => correct.includes(v)).length;
-        const total = correct.length || 1;
+        const benar = u.filter((v) => c.includes(v)).length;
+        const total = c.length || 1;
         raw += benar / total;
       }
     });
 
-    const final = Math.round((raw / (quizData.length || 1)) * 100);
+    const final = Math.round((raw / quizData.length) * 100);
 
     dispatch(setScore({ score: final, totalQuestions: quizData.length }));
 
@@ -235,27 +137,233 @@ export default function QuizPage() {
       })
     );
 
-    // Hapus semua progress
-    dispatch(
-      clearBackendQuiz({
-        tutorialId,
-        userId,
-        level,
-        cache: true,
-        progress: true,
-      })
-    );
-    dispatch(clearProgress({ tutorialId, userId, level }));
+    // CLEAR BACKEND CACHE & PROGRESS
+    try {
+      await dispatch(
+        clearBackendQuiz({
+          tutorialId,
+          userId,
+          level: currentLevel,
+          cache: true,
+          progress: true,
+        })
+      ).unwrap();
+    } catch (err) {
+      console.error("Failed clear backend:", err);
+    }
 
+    // CLEAR LOCAL PROGRESS
+    dispatch(clearProgress({ tutorialId, userId, level: currentLevel }));
+    localStorage.removeItem(LS_KEY);
+
+    // 🔥 FIX PALING PENTING:
+    // HAPUS SEMUA REDUX STATE AGAR AUTOSAVE TIDAK BANGKIT LAGI
+
+
+    // NAVIGATE
     navigate(
       `/completion/${currentLevel}?tutorial=${tutorialId}&user=${userId}`,
       { replace: true }
     );
+  }, [
+    tutorialId,
+    userId,
+    currentLevel,
+    quizData,
+    userAnswers,
+    dispatch,
+    navigate,
+  ]);
+
+  /* ==========================================================
+     RESTORE (LOCAL → BACKEND)
+  ========================================================== */
+  useEffect(() => {
+    mounted.current = true;
+    return () => (mounted.current = false);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      restoring.current = true;
+      autosaveReady.current = false;
+
+      // Load Questions
+      try {
+        await dispatch(
+          loadQuiz({ tutorialId, userId, level: currentLevel })
+        ).unwrap();
+      } catch (_) {}
+
+      if (!mounted.current) return;
+
+      // RESTORE LOCAL
+      const local = localStorage.getItem(LS_KEY);
+      if (local) {
+        dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
+        dispatch(startQuiz());
+
+        restoring.current = false;
+        autosaveReady.current = true;
+        return;
+      }
+
+      // RESTORE BACKEND
+      try {
+        const res = await dispatch(
+          loadProgressFromBackend({
+            tutorialId,
+            userId,
+            level: currentLevel,
+          })
+        );
+
+        if (res?.meta?.requestStatus === "fulfilled") {
+          dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
+        }
+      } catch (_) {}
+
+      dispatch(startQuiz());
+      restoring.current = false;
+      autosaveReady.current = true;
+    })();
+  }, [tutorialId, userId, currentLevel]);
+
+  /* ==========================================================
+     INITIAL SAVE (AWAL QUIZ MASUK)
+  ========================================================== */
+  useEffect(() => {
+    if (!quizStarted) return;
+    if (!autosaveReady.current) return;
+
+    const snap = {
+      currentQuestion,
+      userAnswers,
+      submittedState,
+      timeLeft,
+      updatedAt: new Date().toISOString(),
+    };
+
+    dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
+
+    dispatch(
+      saveProgressToBackend({
+        tutorialId,
+        userId,
+        level: currentLevel,
+        progress: snap,
+      })
+    );
+  }, [
+    quizStarted,
+    autosaveReady.current,
+    currentQuestion,
+    userAnswers,
+    submittedState,
+    timeLeft,
+  ]);
+
+  /* ==========================================================
+     TIMER
+  ========================================================== */
+  useEffect(() => {
+    if (!quizStarted) return;
+    if (restoring.current) return;
+    if (timeLeft == null) return;
+
+    if (timeLeft <= 0) {
+      handleFinish();
+      return;
+    }
+
+    const i = setInterval(() => dispatch(tick()), 1000);
+    return () => clearInterval(i);
+  }, [quizStarted, timeLeft]);
+
+  /* ==========================================================
+     AUTOSAVE (DEBOUNCE)
+  ========================================================== */
+  const queueAutosave = useCallback(() => {
+    if (!autosaveReady.current) return;
+    if (restoring.current) return;
+
+    const snapshot = {
+      currentQuestion,
+      userAnswers,
+      submittedState,
+      timeLeft,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const key = JSON.stringify({
+      currentQuestion,
+      userAnswers,
+      submittedState,
+    });
+    if (lastState.current === key) return;
+    lastState.current = key;
+
+    pendingSave.current = snapshot;
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+
+    saveTimer.current = setTimeout(async () => {
+      saveTimer.current = null;
+      if (!pendingSave.current || saving.current) return;
+
+      saving.current = true;
+      try {
+        await dispatch(
+          saveProgressToBackend({
+            tutorialId,
+            userId,
+            level: currentLevel,
+            progress: pendingSave.current,
+          })
+        );
+        pendingSave.current = null;
+      } catch (_) {}
+      saving.current = false;
+    }, 250);
+  }, [
+    currentQuestion,
+    userAnswers,
+    submittedState,
+    timeLeft,
+    tutorialId,
+    userId,
+    currentLevel,
+  ]);
+
+  useEffect(() => {
+    if (!quizStarted) return;
+    queueAutosave();
+  }, [currentQuestion, userAnswers, submittedState]);
+
+  /* ==========================================================
+     HANDLERS
+  ========================================================== */
+  const handleAnswer = (v) => {
+    dispatch(answerQuestion(v));
+    dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
+    queueAutosave();
   };
 
-  /* ================================================================
-     UI
-  ================================================================ */
+  const handleSubmit = () => {
+    dispatch(submitQuestion());
+    dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
+    queueAutosave();
+  };
+
+  const handleNext = () => {
+    dispatch(nextQuestion());
+    dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
+    queueAutosave();
+  };
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
   if (isLoading) return <LoadingScreen />;
 
   if (error)
@@ -282,22 +390,11 @@ export default function QuizPage() {
         currentQuestion,
         submittedState,
       }}
+      onAnswer={handleAnswer}
+      onSubmit={handleSubmit}
+      onNext={handleNext}
+      onFinish={handleFinish}
       onGoHome={() => navigate("/")}
-      onAnswer={(ans) => {
-        // user interaction - safe to save immediately
-        dispatch(answerQuestion(ans));
-        // persist local (and let autosave push to backend)
-        dispatch(saveProgress({ tutorialId, userId, level }));
-      }}
-      onSubmit={() => {
-        dispatch(submitQuestion());
-        dispatch(saveProgress({ tutorialId, userId, level }));
-      }}
-      onNext={() => {
-        dispatch(nextQuestion());
-        dispatch(saveProgress({ tutorialId, userId, level }));
-      }}
-      onFinish={handleFinishQuiz}
     />
   );
 }

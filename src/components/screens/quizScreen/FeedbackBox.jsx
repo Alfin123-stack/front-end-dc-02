@@ -1,9 +1,10 @@
 /* ------------------------------------------------------
     FEEDBACK BOX – supports HTML explanation clean
--------------------------------------------------------*/
+------------------------------------------------------*/
 import { FaCheckCircle, FaTimesCircle, FaInfoCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { htmlToText } from "html-to-text";
+import PropTypes from "prop-types";
 import React from "react";
 
 export default function FeedbackBox({ isCorrect, explanation }) {
@@ -128,3 +129,9 @@ export default function FeedbackBox({ isCorrect, explanation }) {
     </motion.div>
   );
 }
+
+
+FeedbackBox.propTypes = {
+  isCorrect: PropTypes.bool.isRequired,
+  explanation: PropTypes.string, 
+};

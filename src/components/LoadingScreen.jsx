@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { FaSpinner } from "react-icons/fa";
+import React from "react";
 
 export default function LoadingScreen() {
   return (

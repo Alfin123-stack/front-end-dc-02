@@ -1,3 +1,4 @@
+// src/router/AppRouter.jsx
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,8 +10,12 @@ import ReviewPage from "../pages/ReviewPage";
 import SettingsPage from "../pages/SettingsPage";
 import Layout from "../components/Layout";
 
-import HistoryScreen from "../components/screens/HistoryScreen";
-import HistoryDetailScreen from "../components/screens/HistoryDetailScreen";
+import HistoryPage from "../pages/HistoryPage";
+import HistoryDetailPage from "../pages/HistoryDetailPage";
+
+// ⬅️ Tambahan baru
+import NotFoundPage from "../pages/NotFoundPage";
+import ErrorPage from "../pages/ErrorPage";
 
 export default function AppRouter() {
   const location = useLocation();
@@ -23,19 +28,41 @@ export default function AppRouter() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}>
-        {/* WRAP ALL ROUTES WITH LAYOUT */}
         <Layout>
           <Routes location={location}>
-            <Route path="/" element={<StartPage />} />
-            <Route path="/quiz/:level" element={<QuizPage />} />
-            <Route path="/completion/:level" element={<CompletionPage />} />
-            <Route path="/review/:level" element={<ReviewPage />} />
+            {/* Normal Pages */}
+            <Route
+              path="/"
+              element={<StartPage />}
+              errorElement={<ErrorPage />}
+            />
+
+            <Route
+              path="/quiz/:level"
+              element={<QuizPage />}
+              errorElement={<ErrorPage />}
+            />
+
+            <Route
+              path="/completion/:level"
+              element={<CompletionPage />}
+              errorElement={<ErrorPage />}
+            />
+
+            <Route
+              path="/review/:level"
+              element={<ReviewPage />}
+              errorElement={<ErrorPage />}
+            />
+
             <Route path="/settings" element={<SettingsPage />} />
-            {/* History List */}
-            <Route path="/history" element={<HistoryScreen />} />
-            {/* History Detail */}
-            <Route path="/history/:id" element={<HistoryDetailScreen />} />
-            <Route path="*" element={<StartPage />} />
+
+            {/* History List + Detail */}
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/history/:id" element={<HistoryDetailPage />} />
+
+            {/* NOT FOUND PAGE */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Layout>
       </motion.div>

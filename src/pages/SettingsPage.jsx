@@ -6,7 +6,7 @@ import {
   selectSettings,
   updateSettings,
   toggleTheme,
-} from "../store/settingsSlice";
+} from "../store/settings/settingsSlice";
 
 import SettingsScreen from "../components/screens/SettingsScreen";
 

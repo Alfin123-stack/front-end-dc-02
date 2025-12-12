@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { htmlToText } from "html-to-text";
 import React from "react";
+import PropTypes from "prop-types";
 
 export default function OptionItem({
   option,
@@ -77,7 +78,7 @@ export default function OptionItem({
           {/* Option Text */}
           <span
             className="
-               font-normal text-gray-900 dark:text-gray-200 
+              font-normal text-gray-900 dark:text-gray-200 
               text-sm leading-snug
             ">
             {htmlToText(option.text || "")}
@@ -105,3 +106,19 @@ export default function OptionItem({
     </motion.div>
   );
 }
+
+/* ================================
+    PROP TYPES
+================================ */
+OptionItem.propTypes = {
+  option: PropTypes.shape({
+    text: PropTypes.string.isRequired,
+  }).isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  isMultipleAnswer: PropTypes.bool,
+};
+
+OptionItem.defaultProps = {
+  isMultipleAnswer: false,
+};

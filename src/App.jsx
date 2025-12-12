@@ -1,13 +1,13 @@
 // src/App.jsx
+import React from "react";
 import { Provider, useDispatch } from "react-redux";
-import UnlockProvider from "./contexts/UnlockProvider";
-import AppRouter from "./router/AppRouter";
-import store from "./store/store";
-import { Toaster } from "sonner";
-
+import { PersistGate } from "redux-persist/integration/react";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { fetchUserPreferences } from "./store/settingsSlice";
+
+import AppRouter from "./router/AppRouter";
+import store, { persistor } from "./store/store";
+import { fetchUserPreferences } from "./store/settings/settingsThunks";
 
 function LoadUserPreferences() {
   const dispatch = useDispatch();
@@ -28,12 +28,12 @@ function LoadUserPreferences() {
 export default function App() {
   return (
     <Provider store={store}>
-      <LoadUserPreferences />
+      <PersistGate loading={null} persistor={persistor}>
+        <LoadUserPreferences />
 
-      <Toaster position="top-right" richColors />
-      <UnlockProvider>
+        {/* Router utama */}
         <AppRouter />
-      </UnlockProvider>
+      </PersistGate>
     </Provider>
   );
 }

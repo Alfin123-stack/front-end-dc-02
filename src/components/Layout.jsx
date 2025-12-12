@@ -1,7 +1,7 @@
 // src/layout/Layout.jsx
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectSettings, toggleTheme } from "../store/settingsSlice";
+import { selectSettings, toggleTheme } from "../store/settings/settingsSlice";
 import { FaCogs, FaMoon, FaSun, FaArrowLeft } from "react-icons/fa";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 
