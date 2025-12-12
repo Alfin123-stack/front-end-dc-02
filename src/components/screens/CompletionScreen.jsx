@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 
-import ScoreRing from "./completion/ScoreRing";
+import ScoreRing from "./completion/CompletionScoreRing";
 import CompletionHeader from "./completion/CompletionHeader";
 import CompletionMessage from "./completion/CompletionMessage";
 import CompletionButtons from "./completion/CompletionButtons";
@@ -36,7 +36,6 @@ export default function CompletionScreen() {
   /* === Gunakan helper === */
   const percentage = calcScorePercentage(score);
   const color = getScoreColorName(percentage); // red | yellow | green
-
 
   return (
     <motion.div

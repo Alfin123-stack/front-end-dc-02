@@ -1,4 +1,3 @@
-
 import React from "react";
 import PropTypes from "prop-types";
 import { HiBookOpen, HiArrowPath, HiHome } from "react-icons/hi2";
@@ -17,7 +16,6 @@ export default function CompletionButtons({
 }) {
   return (
     <div className="flex flex-col gap-3">
-
       <AppButton
         iconLeft={<HiBookOpen />}
         variant="primary"
@@ -26,7 +24,6 @@ export default function CompletionButtons({
         }>
         Review Jawaban
       </AppButton>
-
 
       <AppButton
         iconLeft={<HiArrowPath />}
@@ -37,7 +34,6 @@ export default function CompletionButtons({
         }}>
         Ulangi Quiz
       </AppButton>
-
 
       <AppButton
         iconLeft={<HiHome />}

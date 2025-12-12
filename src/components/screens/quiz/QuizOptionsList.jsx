@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import OptionItem from "./OptionItem";
-import FeedbackBox from "./FeedbackBox";
+import OptionItem from "./QuizOptionItem";
+import FeedbackBox from "./QuizFeedbackBox";
 import PropTypes from "prop-types";
 
 export default function OptionsList({

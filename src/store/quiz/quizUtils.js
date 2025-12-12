@@ -73,12 +73,6 @@ export const saveHistory = (entry) => {
   safeSet(HISTORY_KEY, list);
 };
 
-export const deleteHistoryItem = (id) => {
-  const list = loadHistory();
-  const filtered = list.filter((h) => h.id !== id);
-  safeSet(HISTORY_KEY, filtered);
-};
-
 export const clearHistory = () => safeRemove(HISTORY_KEY);
 
 /* =====================================================

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 import { HiArrowLeft } from "react-icons/hi2";
-import { fadeUp } from "./animations";
+import { fadeUp } from "../utils/animations";
 import { formatTimestamp, getPercentColor } from "../utils/helper";
 import AppButton from "./ui/AppButton";
 

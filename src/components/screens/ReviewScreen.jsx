@@ -2,13 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { HiArrowLeft, HiArrowPath } from "react-icons/hi2";
 
-import { containerStagger } from "../animations";
+import { containerStagger } from "../../utils/animations";
 import QuestionList from "../QuestionList";
 import QuizHeader from "../QuizHeader";
 import AppButton from "../ui/AppButton";
 import EmptyState from "../ui/EmptyState";
 import useReviewScreen from "../../hooks/useReviewScreen";
-
 
 export default function ReviewScreen() {
   const {

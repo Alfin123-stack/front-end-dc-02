@@ -81,3 +81,25 @@ export const paginate = (items, page, limit) => {
 export const getTotalPages = (items, limit) => {
   return Math.ceil(items.length / limit);
 };
+
+export const getStatusBadge = (status, loading) => {
+  const base =
+    "px-3 py-1 text-[10px] font-bold rounded-full shadow-sm border backdrop-blur-sm";
+
+  if (loading)
+    return {
+      className: `${base} bg-gray-500/20 border-gray-400 text-gray-300`,
+      label: "Memuat...",
+    };
+
+  if (status === "Lanjutkan")
+    return {
+      className: `${base} bg-yellow-500/20 border-yellow-400 text-yellow-300`,
+      label: "Lanjutkan",
+    };
+
+  return {
+    className: `${base} bg-gray-400/20 border-gray-400 text-gray-300`,
+    label: "Mulai",
+  };
+};

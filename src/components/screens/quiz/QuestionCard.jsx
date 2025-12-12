@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import QuestionText from "./QuestionText";
-import OptionsList from "./OptionsList";
-import ActionButtons from "./ActionButtons";
+import OptionsList from "./QuizOptionsList";
+import ActionButtons from "./QuizActionButtons";
 import PropTypes from "prop-types";
 
 export default function QuestionCard({
