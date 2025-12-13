@@ -103,3 +103,8 @@ export const getStatusBadge = (status, loading) => {
     label: "Mulai",
   };
 };
+
+export const getTimeByLevel = (level) => {
+  const map = { 1: 60, 2: 75, 3: 90 };
+  return map[level] ?? 30;
+};

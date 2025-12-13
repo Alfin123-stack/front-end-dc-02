@@ -24,6 +24,7 @@ import {
 
 import { loadLocalProgress } from "../store/quiz/quizUtils";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { getTimeByLevel } from "../utils/helper";
 
 export function useQuizEngine() {
   const navigate = useNavigate();
@@ -71,11 +72,9 @@ export function useQuizEngine() {
     };
   }, []);
 
-  /* ==========================================================
-     LOAD QUIZ + RESTORE
-  ========================================================== */
   useEffect(() => {
     let active = true;
+
     (async () => {
       restoring.current = true;
       autosaveReady.current = false;
@@ -90,49 +89,40 @@ export function useQuizEngine() {
 
       if (!mounted.current || !active) return;
 
-      // Restore local
+      // 1️⃣ RESTORE LOCAL
       const local = loadLocalProgress(userId, tutorialId, currentLevel);
 
       if (local) {
         dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
-        const times = { 1: 60, 2: 75, 3: 90 };
+      } else {
+        // 2️⃣ RESTORE BACKEND
+        try {
+          const res = await dispatch(
+            loadProgressFromBackend({
+              tutorialId,
+              userId,
+              level: currentLevel,
+            })
+          );
 
-        // ⬇️ SET TIME DULU
-        dispatch(setTime(times[currentLevel] || 30));
-
-        // ⬇️ BARU START QUIZ
-        dispatch(startQuiz());
-
-        restoring.current = false;
-        autosaveReady.current = true;
-
-        restoring.current = false;
-        autosaveReady.current = true;
-        return;
-      }
-
-      // Restore backend
-      try {
-        const res = await dispatch(
-          loadProgressFromBackend({
-            tutorialId,
-            userId,
-            level: currentLevel,
-          })
-        );
-
-        if (
-          res?.meta?.requestStatus === "fulfilled" &&
-          mounted.current &&
-          active
-        ) {
-          dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
+          if (
+            res?.meta?.requestStatus === "fulfilled" &&
+            mounted.current &&
+            active
+          ) {
+            dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
+          }
+        } catch (err) {
+          console.warn("⚠️ Load progress failed:", err);
         }
-      } catch (err) {
-        console.warn("⚠️ Load progress failed:", err);
       }
 
+      // ✅ SATU-SATUNYA TEMPAT SET TIME
+      dispatch(setTime(getTimeByLevel(currentLevel)));
+
+      // ✅ START QUIZ SELALU SETELAH TIME
       dispatch(startQuiz());
+
       restoring.current = false;
       autosaveReady.current = true;
     })();
