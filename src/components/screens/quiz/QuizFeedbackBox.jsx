@@ -102,6 +102,7 @@ export default function FeedbackBox({ isCorrect, explanation }) {
           {cleanExplanation ? (
             <p className="text-sm">
               <span className="font-semibold">Penjelasan: </span>
+              <br />
               {cleanExplanation}
             </p>
           ) : (
@@ -130,8 +131,7 @@ export default function FeedbackBox({ isCorrect, explanation }) {
   );
 }
 
-
 FeedbackBox.propTypes = {
   isCorrect: PropTypes.bool.isRequired,
-  explanation: PropTypes.string, 
+  explanation: PropTypes.string,
 };
