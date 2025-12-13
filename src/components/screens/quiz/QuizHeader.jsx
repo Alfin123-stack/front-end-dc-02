@@ -2,13 +2,20 @@ import React from "react";
 import { motion } from "framer-motion";
 import { FaClock, FaLevelUpAlt } from "react-icons/fa";
 import PropTypes from "prop-types";
+import { useParams } from "react-router-dom";
 
-export default function QuizHeader({
-  tutorial,
-  difficulty,
-  timeLeft,
-  variants,
-}) {
+export default function QuizHeader({ tutorial, timeLeft, variants }) {
+  const { level } = useParams();
+  const numericLevel = Number(level);
+
+  const difficultyMap = {
+    1: "Mudah",
+    2: "Sedang",
+    3: "Sulit",
+  };
+
+  const difficulty = difficultyMap[numericLevel] ?? "—";
+
   const minutes = Math.floor((timeLeft || 0) / 60);
   const seconds = String((timeLeft || 0) % 60).padStart(2, "0");
 
@@ -28,7 +35,7 @@ export default function QuizHeader({
           className="flex items-center gap-2 px-3 py-1 rounded-xl bg-white/70 dark:bg-white/10 border border-black/10 dark:border-white/10 backdrop-blur-md">
           <FaLevelUpAlt className="text-yellow-500 text-sm" />
           <span className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200">
-            {difficulty ?? "—"}
+            {difficulty}
           </span>
         </motion.div>
       </div>
@@ -48,20 +55,18 @@ export default function QuizHeader({
   );
 }
 
-
+/* ================= PROPTYPES ================= */
 QuizHeader.propTypes = {
   tutorial: PropTypes.shape({
     title: PropTypes.string,
   }),
-  difficulty: PropTypes.string,
   timeLeft: PropTypes.number,
   variants: PropTypes.object,
 };
 
-/* Default Values */
+/* ================= DEFAULT PROPS ================= */
 QuizHeader.defaultProps = {
   tutorial: { title: "Judul Tidak Ditemukan" },
-  difficulty: "—",
   timeLeft: 0,
   variants: {},
 };

@@ -21,6 +21,7 @@ const quizSlice = createSlice({
     },
 
     setTime(state, action) {
+      console.log("SET TIME PAYLOAD", action.payload);
       state.timeLeft = action.payload;
     },
 

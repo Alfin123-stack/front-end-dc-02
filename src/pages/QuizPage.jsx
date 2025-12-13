@@ -5,7 +5,6 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useQuizEngine } from "../hooks/useQuizEngine";
 
 export default function QuizPage() {
-  
   const {
     quizData,
     tutorial,
@@ -19,8 +18,9 @@ export default function QuizPage() {
     handleFinish,
     isLoading,
     error,
-    navigate
+    navigate,
   } = useQuizEngine();
+
 
   /* ==========================================================
      RENDER

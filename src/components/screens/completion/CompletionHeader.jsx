@@ -14,7 +14,7 @@ export default function CompletionHeader({ levelNum, color, colorText }) {
       </motion.h1>
 
       <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">
-        Berikut hasil latihan kamu
+        Berikut hasil quiz kamu
       </p>
     </div>
   );

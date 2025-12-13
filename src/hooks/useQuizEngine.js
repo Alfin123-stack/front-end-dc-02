@@ -31,6 +31,7 @@ export function useQuizEngine() {
   const location = useLocation();
 
   const currentLevel = Number(useParams().level);
+  console.log("level", currentLevel);
 
   const tutorialId = Number(
     new URLSearchParams(location.search).get("tutorial") || 1
@@ -94,7 +95,17 @@ export function useQuizEngine() {
 
       if (local) {
         dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
+        const times = { 1: 60, 2: 75, 3: 90 };
+
+        // ⬇️ SET TIME DULU
+        dispatch(setTime(times[currentLevel] || 30));
+
+        // ⬇️ BARU START QUIZ
         dispatch(startQuiz());
+
+        restoring.current = false;
+        autosaveReady.current = true;
+
         restoring.current = false;
         autosaveReady.current = true;
         return;
@@ -130,17 +141,6 @@ export function useQuizEngine() {
       active = false;
     };
   }, [tutorialId, userId, currentLevel, dispatch]);
-
-  /* ==========================================================
-     SET INITIAL TIME (setelah startQuiz)
-  ========================================================== */
-  useEffect(() => {
-    if (!quizStarted) return;
-    if (!restoring.current) return;
-
-    const times = { 1: 60, 2: 75, 3: 90 };
-    dispatch(setTime(times[currentLevel] || 30));
-  }, [quizStarted, currentLevel, dispatch]);
 
   /* ==========================================================
      INITIAL SAVE (only once after quizStarted)

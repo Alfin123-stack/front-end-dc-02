@@ -33,7 +33,6 @@ export default function QuizScreen(props) {
       <div className="w-full mx-auto max-w-3xl px-3 sm:px-6 lg:px-8">
         <QuizHeader
           tutorial={tutorial}
-          difficulty={q?.difficulty}
           timeLeft={timeLeft}
           variants={fadeInUp}
         />
