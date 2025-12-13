@@ -258,3 +258,82 @@ export const clearBackendQuiz = createAsyncThunk(
     }
   }
 );
+
+/* ======================================================
+   GET QUIZ HISTORY
+   GET /quiz/history
+====================================================== */
+export const getQuizHistory = createAsyncThunk(
+  "quizHistory/get",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        "https://backend-dc-02.vercel.app/api/quiz/history"
+      );
+
+      return res.data.history || [];
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Gagal mengambil history" }
+      );
+    }
+  }
+);
+
+/* ======================================================
+   SAVE QUIZ HISTORY (RAW)
+   POST /quiz/history
+====================================================== */
+export const saveQuizHistory = createAsyncThunk(
+  "quizHistory/save",
+  async (
+    { tutorialId, quizData, userAnswers, score, totalQuestions, level },
+    { rejectWithValue }
+  ) => {
+    try {
+      const payload = {
+        id: Date.now(),
+        tutorialId,
+        level,
+        quizData,
+        userAnswers,
+        score,
+        totalQuestions,
+        percentage: Math.round((score / totalQuestions) * 100),
+        timestamp: new Date().toISOString(),
+      };
+
+      const res = await axios.post(
+        "https://backend-dc-02.vercel.app/api/quiz/history",
+        payload
+      );
+
+      return res.data.entry; // backend balikin RAW entry
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Gagal menyimpan history" }
+      );
+    }
+  }
+);
+
+/* ======================================================
+   CLEAR ALL QUIZ HISTORY
+   DELETE /quiz/history/clear
+====================================================== */
+export const clearQuizHistory = createAsyncThunk(
+  "quizHistory/clear",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.delete(
+        "https://backend-dc-02.vercel.app/api/quiz/history/clear"
+      );
+
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Gagal menghapus history" }
+      );
+    }
+  }
+);
