@@ -14,17 +14,21 @@ const quizSlice = createSlice({
   initialState,
   reducers: {
     tick(state) {
+      if (!state.quizStarted) return;
+      if (!state.quizLoaded) return;
+      if (state.timeLeft <= 0) return;
+
       state.timeLeft -= 1;
     },
 
     setTime(state, action) {
+      if (state.quizStarted) return;
       state.timeLeft = action.payload;
     },
-
     startQuiz(state) {
+      if (!state.quizLoaded) return;
       state.quizStarted = true;
     },
-
     resetQuiz(state) {
       state.quizStarted = false;
       state.currentQuestion = 0;
@@ -144,14 +148,9 @@ const quizSlice = createSlice({
         Object.assign(state, {
           isLoading: false,
           quizLoaded: true,
-
           tutorial: data.tutorial ?? null,
           meta: data.meta ?? {},
           quizData: data.quizData ?? [],
-
-          currentQuestion: 0,
-          userAnswers: [],
-          submittedState: {},
         });
       })
 

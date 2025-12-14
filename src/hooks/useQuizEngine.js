@@ -80,10 +80,9 @@ export function useQuizEngine() {
       autosaveReady.current = false;
 
       try {
-        const quiz = dispatch(
+        await dispatch(
           loadQuiz({ tutorialId, userId, level: currentLevel })
-        );
-        console.log("Loaded quiz:", quiz);
+        ).unwrap();
       } catch (err) {
         console.warn("⚠️ Load quiz failed:", err);
       }
@@ -122,8 +121,9 @@ export function useQuizEngine() {
       dispatch(setTime(getTimeByLevel(currentLevel)));
       console.log("Set time for level", currentLevel);
 
-      // ✅ START QUIZ SELALU SETELAH TIME
-      dispatch(startQuiz());
+      if (mounted.current && active) {
+        dispatch(startQuiz());
+      }
 
       restoring.current = false;
       autosaveReady.current = true;

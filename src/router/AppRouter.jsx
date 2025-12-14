@@ -7,7 +7,7 @@ import StartPage from "../pages/StartPage";
 import QuizPage from "../pages/QuizPage";
 import CompletionPage from "../pages/CompletionPage";
 import ReviewPage from "../pages/ReviewPage";
-import SettingsPage from "../pages/SettingsPage";
+
 import Layout from "../components/Layout";
 
 import HistoryPage from "../pages/HistoryPage";
@@ -53,8 +53,6 @@ export default function AppRouter() {
               element={<ReviewPage />}
               errorElement={<ErrorPage />}
             />
-
-            <Route path="/settings" element={<SettingsPage />} />
 
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/history/:id" element={<HistoryDetailPage />} />
