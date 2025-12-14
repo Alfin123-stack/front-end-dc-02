@@ -1,4 +1,3 @@
-// src/layout/Layout.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
@@ -24,7 +23,6 @@ export default function Layout({ children }) {
         font-${settings.fontFamily}
         font-${settings.fontSize}
       `}>
-      {/* CONTENT */}
       <main className="relative z-10 p-4 sm:p-6">{children}</main>
     </div>
   );

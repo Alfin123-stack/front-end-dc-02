@@ -102,3 +102,9 @@ export const getTimeByLevel = (level) => {
   const map = { 1: 60, 2: 75, 3: 90 };
   return map[level] ?? 30;
 };
+
+export const difficultyMap = {
+  1: "Mudah",
+  2: "Sedang",
+  3: "Sulit",
+};

@@ -31,7 +31,7 @@ export default function StartScreenLevelGrid({
 }
 
 StartScreenLevelGrid.propTypes = {
-  levelStatus: PropTypes.object.isRequired, // { 1: "Mulai" | "Lanjutkan", ... }
+  levelStatus: PropTypes.object.isRequired,
   loadingStatus: PropTypes.bool.isRequired,
   handleStart: PropTypes.func.isRequired,
 };

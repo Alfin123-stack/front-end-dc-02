@@ -4,12 +4,8 @@ import {
   clearHistory,
   loadHistory,
   loadLocalProgress,
-  loadQuizCache,
-  normalizeQuiz,
   replaceHistory,
-  saveHistory,
   saveLocalProgress,
-  saveQuizCache,
 } from "../quizUtils";
 
 export const saveQuizCacheToBackend = createAsyncThunk(
@@ -37,61 +33,6 @@ export const saveQuizCacheToBackend = createAsyncThunk(
     } catch (err) {
       console.error("Save quiz cache error:", err.message);
       return rejectWithValue("Gagal menyimpan quiz cache.");
-    }
-  }
-);
-
-export const getQuizCacheFromBackend = createAsyncThunk(
-  "quiz/getBackendQuizCache",
-  async ({ tutorialId, userId, level }, { rejectWithValue }) => {
-    try {
-      /* ===============================
-         1. Cek cache lokal
-      =============================== */
-      const local = loadQuizCache(userId, tutorialId, level);
-      if (local?.quizData) {
-        return local;
-      }
-
-      /* ===============================
-         2. Ambil dari backend
-      =============================== */
-      let res;
-      try {
-        res = await axios.get(
-          "https://backend-dc-02.vercel.app/api/quiz/cache",
-          {
-            params: {
-              tutorialId,
-              userId,
-              level,
-            },
-          }
-        );
-      } catch (err) {
-        console.warn("Backend cache fetch failed:", err?.message);
-        return rejectWithValue("Backend tidak bisa diakses");
-      }
-
-      if (!res?.data?.success || !res.data.quizCache) {
-        return rejectWithValue("Quiz cache tidak ditemukan");
-      }
-
-      /* ===============================
-         3. Normalisasi & simpan cache
-      =============================== */
-      const normalized = {
-        tutorial: res.data.quizCache.tutorial,
-        meta: res.data.quizCache.meta,
-        quizData: normalizeQuiz(res.data.quizCache.quizData),
-      };
-
-      saveQuizCache(userId, tutorialId, level, normalized);
-
-      return normalized;
-    } catch (err) {
-      console.error("Get quiz cache error:", err);
-      return rejectWithValue("Gagal mengambil quiz cache.");
     }
   }
 );
@@ -196,10 +137,8 @@ export const clearQuizHistory = createAsyncThunk(
   "quizHistory/clear",
   async (_, { rejectWithValue }) => {
     try {
-      // 1️⃣ bersihkan local langsung
       clearHistory();
 
-      // 2️⃣ hapus di backend
       await axios.delete(
         "https://backend-dc-02.vercel.app/api/quiz/history/clear"
       );
@@ -219,7 +158,6 @@ export const getQuizHistory = createAsyncThunk(
     try {
       const local = loadHistory();
       if (local.length) {
-        // sync backend → REPLACE
         axios
           .get("https://backend-dc-02.vercel.app/api/quiz/history")
           .then((res) => {

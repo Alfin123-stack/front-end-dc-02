@@ -2,7 +2,7 @@ const safeSet = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
-    console.warn(`❗ Failed to save "${key}"`, error);
+    console.warn(`Failed to save "${key}"`, error);
   }
 };
 
@@ -20,7 +20,7 @@ const safeRemove = (key) => {
   try {
     localStorage.removeItem(key);
   } catch (error) {
-    console.warn(`❗ Failed to delete "${key}"`, error);
+    console.warn(`Failed to delete "${key}"`, error);
   }
 };
 

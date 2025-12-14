@@ -16,9 +16,6 @@ export default function useHistoryScreen(tutorialId) {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  /* ===============================
-     LOAD HISTORY (LOCAL → REDIS)
-  =============================== */
   useEffect(() => {
     let mounted = true;
 
@@ -55,9 +52,6 @@ export default function useHistoryScreen(tutorialId) {
   const nextPage = () => page < totalPages && setPage(page + 1);
   const prevPage = () => page > 1 && setPage(page - 1);
 
-  /* ===============================
-     DELETE ALL (LOCAL + REDIS)
-  =============================== */
   const handleDeleteAll = async () => {
     try {
       await dispatch(clearQuizHistory()).unwrap();

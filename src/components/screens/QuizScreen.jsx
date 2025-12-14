@@ -1,4 +1,3 @@
-// src/components/screens/QuizScreen.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { AnimatePresence } from "framer-motion";
@@ -27,8 +26,6 @@ export default function QuizScreen(props) {
   } = useQuizScreen(props);
 
   const { tutorial, quizData, currentQuestion, timeLeft } = data;
-
-  console.log("QuizScreen data:", data);
 
   return (
     <div className="min-h-screen bg-[#f7f9fc] dark:bg-[#0b1220] py-6 sm:py-10 transition-all duration-300">
@@ -69,9 +66,6 @@ export default function QuizScreen(props) {
   );
 }
 
-/* ------------------------------------------------
-   ✅ PropTypes
------------------------------------------------- */
 QuizScreen.propTypes = {
   data: PropTypes.shape({
     tutorial: PropTypes.shape({
@@ -101,7 +95,6 @@ QuizScreen.propTypes = {
     timeLeft: PropTypes.number.isRequired,
   }).isRequired,
 
-  // Props lain yang dipakai oleh hook
   onAnswer: PropTypes.func,
   onNext: PropTypes.func,
   onFinish: PropTypes.func,

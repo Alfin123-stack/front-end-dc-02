@@ -3,16 +3,11 @@ import { motion } from "framer-motion";
 import { FaClock, FaLevelUpAlt } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
+import { difficultyMap } from "../../../utils/helper";
 
 export default function QuizHeader({ tutorial, timeLeft, variants }) {
   const { level } = useParams();
   const numericLevel = Number(level);
-
-  const difficultyMap = {
-    1: "Mudah",
-    2: "Sedang",
-    3: "Sulit",
-  };
 
   const difficulty = difficultyMap[numericLevel] ?? "—";
 
@@ -55,7 +50,6 @@ export default function QuizHeader({ tutorial, timeLeft, variants }) {
   );
 }
 
-/* ================= PROPTYPES ================= */
 QuizHeader.propTypes = {
   tutorial: PropTypes.shape({
     title: PropTypes.string,
@@ -64,7 +58,6 @@ QuizHeader.propTypes = {
   variants: PropTypes.object,
 };
 
-/* ================= DEFAULT PROPS ================= */
 QuizHeader.defaultProps = {
   tutorial: { title: "Judul Tidak Ditemukan" },
   timeLeft: 0,

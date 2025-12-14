@@ -10,7 +10,6 @@ export default function LoadingScreen() {
         bg-white text-gray-900
         dark:bg-[#1e2939] dark:text-[#d1d5dc]
       ">
-      {/* Spinner */}
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, duration: 1.3, ease: "linear" }}
@@ -23,7 +22,6 @@ export default function LoadingScreen() {
         />
       </motion.div>
 
-      {/* Loading Text */}
       <motion.p
         className="
           font-semibold text-base sm:text-lg md:text-xl

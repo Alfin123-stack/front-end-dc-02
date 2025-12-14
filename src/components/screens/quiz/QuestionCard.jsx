@@ -52,9 +52,6 @@ export default function QuestionCard({
   );
 }
 
-/* =====================================================
-    PROP TYPES
-===================================================== */
 QuestionCard.propTypes = {
   q: PropTypes.shape({
     question: PropTypes.string,

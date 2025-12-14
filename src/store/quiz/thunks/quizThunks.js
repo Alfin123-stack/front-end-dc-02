@@ -43,17 +43,11 @@ export const loadQuiz = createAsyncThunk(
         data,
       });
 
-      /* ===============================
-         1️⃣ LOCAL QUIZ CACHE
-      =============================== */
       const local = loadQuizCache(uID, tID, lvl);
       if (local?.quizData?.length) {
         return wrap(local, true, false);
       }
 
-      /* ===============================
-         2️⃣ BACKEND QUIZ CACHE
-      =============================== */
       try {
         const res = await axios.get(
           "https://backend-dc-02.vercel.app/api/quiz/cache",
@@ -71,12 +65,9 @@ export const loadQuiz = createAsyncThunk(
           return wrap(cached, false, true);
         }
       } catch (err) {
-        console.warn("⚠️ Backend cache gagal:", err?.message);
+        console.warn("Backend cache gagal:", err?.message);
       }
 
-      /* ===============================
-         3️⃣ GENERATE QUIZ
-      =============================== */
       try {
         const gen = await axios.post(
           "https://backend-dc-02.vercel.app/api/quiz/generate",
@@ -106,12 +97,9 @@ export const loadQuiz = createAsyncThunk(
           return wrap(normalized);
         }
       } catch (err) {
-        console.warn("⚠️ Generate API failed:", err?.message);
+        console.warn("Generate API failed:", err?.message);
       }
 
-      /* ===============================
-         4️⃣ FALLBACK
-      =============================== */
       const resp = staticQuizResponse;
       const fallback = {
         tutorial: resp.tutorial,

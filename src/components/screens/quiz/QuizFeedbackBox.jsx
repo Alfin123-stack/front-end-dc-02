@@ -1,6 +1,3 @@
-/* ------------------------------------------------------
-    FEEDBACK BOX – supports HTML explanation clean
-------------------------------------------------------*/
 import { FaCheckCircle, FaTimesCircle, FaInfoCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { htmlToText } from "html-to-text";
@@ -8,7 +5,6 @@ import PropTypes from "prop-types";
 import React from "react";
 
 export default function FeedbackBox({ isCorrect, explanation }) {
-  // Convert HTML → plain text
   const cleanExplanation = explanation
     ? htmlToText(explanation, {
         wordwrap: false,
@@ -34,7 +30,6 @@ export default function FeedbackBox({ isCorrect, explanation }) {
             : "border-red-300 bg-gradient-to-br from-red-100/70 to-red-200/40 dark:from-red-900/40 dark:to-red-800/25"
         }
       `}>
-      {/* Soft Glow */}
       <div
         className={`
           absolute -top-16 -right-12 w-40 h-40 rounded-full blur-3xl opacity-25
@@ -46,7 +41,6 @@ export default function FeedbackBox({ isCorrect, explanation }) {
         `}
       />
 
-      {/* Header */}
       <div className="flex items-center gap-4 mb-4">
         <motion.div
           initial={{ scale: 0 }}
@@ -83,10 +77,8 @@ export default function FeedbackBox({ isCorrect, explanation }) {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-[1px] w-full bg-gray-300/70 dark:bg-gray-700/40 my-4" />
 
-      {/* Explanation Box */}
       <div className="flex gap-3 md:gap-4">
         <FaInfoCircle className="text-gray-700 dark:text-gray-300 mt-1 text-lg md:text-xl" />
 
@@ -113,7 +105,6 @@ export default function FeedbackBox({ isCorrect, explanation }) {
         </div>
       </div>
 
-      {/* Motivation */}
       <p
         className={`
           mt-4 text-xs md:text-sm italic

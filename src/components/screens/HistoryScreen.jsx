@@ -40,25 +40,16 @@ export default function HistoryScreen() {
           setShowConfirm={setShowConfirm}
         />
 
-        {/* ===============================
-            LOADING STATE
-        =============================== */}
         {loading && (
           <div className="mt-6">
             <LoadingState message="Memuat riwayat quiz..." />
           </div>
         )}
 
-        {/* ===============================
-            EMPTY STATE
-        =============================== */}
         {!loading && filteredHistory.length === 0 && (
           <EmptyState message="Belum ada riwayat untuk tutorial ini." />
         )}
 
-        {/* ===============================
-            HISTORY LIST
-        =============================== */}
         {!loading && filteredHistory.length > 0 && (
           <>
             <div className="space-y-5 mt-6">

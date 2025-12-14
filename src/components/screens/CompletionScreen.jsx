@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -36,7 +34,7 @@ export default function CompletionScreen() {
 
   /* === Gunakan helper === */
   const percentage = calcScorePercentage(score);
-  const color = getScoreColorName(percentage); // red | yellow | green
+  const color = getScoreColorName(percentage);
 
   return (
     <motion.div

@@ -29,7 +29,6 @@ export default function OptionItem({
             : "border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700/60"
         }
       `}>
-      {/* Ripple tap effect */}
       <span
         className="
           absolute inset-0 opacity-0 group-active:opacity-100
@@ -37,7 +36,6 @@ export default function OptionItem({
         "
       />
 
-      {/* Glowing Left Bar */}
       <AnimatePresence>
         {isSelected && (
           <motion.div
@@ -54,10 +52,8 @@ export default function OptionItem({
         )}
       </AnimatePresence>
 
-      {/* CONTENT */}
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
-          {/* Icon Animation */}
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -75,7 +71,6 @@ export default function OptionItem({
             )}
           </motion.div>
 
-          {/* Option Text */}
           <span
             className="
               font-normal text-gray-900 dark:text-gray-200 
@@ -85,7 +80,6 @@ export default function OptionItem({
           </span>
         </div>
 
-        {/* SELECTED BADGE */}
         <AnimatePresence>
           {isSelected && (
             <motion.span
@@ -107,9 +101,6 @@ export default function OptionItem({
   );
 }
 
-/* ================================
-    PROP TYPES
-================================ */
 OptionItem.propTypes = {
   option: PropTypes.shape({
     text: PropTypes.string.isRequired,

@@ -15,10 +15,8 @@ export default function LoadingState({ message = "Memuat data..." }) {
         text-gray-600 dark:text-gray-300
         flex flex-col items-center gap-4
       ">
-      {/* Spinner */}
       <div className="h-6 w-6 rounded-full border-2 border-gray-300 border-t-transparent dark:border-gray-600 animate-spin" />
 
-      {/* Text */}
       <span className="text-sm">{message}</span>
     </motion.div>
   );
