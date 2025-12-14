@@ -28,6 +28,8 @@ export default function QuizScreen(props) {
 
   const { tutorial, quizData, currentQuestion, timeLeft } = data;
 
+  console.log("QuizScreen data:", data);
+
   return (
     <div className="min-h-screen bg-[#f7f9fc] dark:bg-[#0b1220] py-6 sm:py-10 transition-all duration-300">
       <div className="w-full mx-auto max-w-3xl px-3 sm:px-6 lg:px-8">

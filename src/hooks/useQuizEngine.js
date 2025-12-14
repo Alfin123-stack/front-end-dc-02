@@ -120,6 +120,7 @@ export function useQuizEngine() {
 
       // ✅ SATU-SATUNYA TEMPAT SET TIME
       dispatch(setTime(getTimeByLevel(currentLevel)));
+      console.log("Set time for level", currentLevel);
 
       // ✅ START QUIZ SELALU SETELAH TIME
       dispatch(startQuiz());
@@ -164,16 +165,13 @@ export function useQuizEngine() {
   ========================================================== */
   useEffect(() => {
     if (!quizStarted) return;
-    if (restoring.current) return;
 
-    if (timeLeft <= 0) {
-      handleFinish();
-      return;
-    }
+    const interval = setInterval(() => {
+      dispatch(tick());
+    }, 1000);
 
-    const interval = setInterval(() => dispatch(tick()), 1000);
     return () => clearInterval(interval);
-  }, [quizStarted, timeLeft]);
+  }, [quizStarted, dispatch]);
 
   /* ==========================================================
      AUTOSAVE (DEBOUNCE)
@@ -288,20 +286,20 @@ export function useQuizEngine() {
     dispatch(setScore({ score: finalScore, totalQuestions: quizData.length }));
 
     // ✅ SIMPAN KE REDIS (BACKEND)
-try {
-  await dispatch(
-    saveQuizHistory({
-      tutorialId,
-      quizData,
-      userAnswers,
-      score: finalScore,
-      level: currentLevel,
-      totalQuestions: quizData.length,
-    })
-  ).unwrap();
-} catch (err) {
-  console.warn("⚠️ Save history failed:", err);
-}
+    try {
+      await dispatch(
+        saveQuizHistory({
+          tutorialId,
+          quizData,
+          userAnswers,
+          score: finalScore,
+          level: currentLevel,
+          totalQuestions: quizData.length,
+        })
+      ).unwrap();
+    } catch (err) {
+      console.warn("⚠️ Save history failed:", err);
+    }
 
     dispatch(
       saveHistory({

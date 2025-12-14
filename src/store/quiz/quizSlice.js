@@ -9,7 +9,6 @@ import { initialState } from "./quizInitial";
 import { loadQuiz, loadTutorialHeading } from "./thunks/quizThunks";
 import { loadProgressFromBackend } from "./thunks/quizCacheThunks";
 
-
 const quizSlice = createSlice({
   name: "quiz",
   initialState,
@@ -82,6 +81,7 @@ const quizSlice = createSlice({
 
       if (!data) return;
 
+      console.log("Loaded local progress:", data);
       Object.assign(state, {
         currentQuestion: data.currentQuestion ?? 0,
         userAnswers: data.userAnswers ?? [],
@@ -152,8 +152,6 @@ const quizSlice = createSlice({
           currentQuestion: 0,
           userAnswers: [],
           submittedState: {},
-          timeLeft: 30,
-          quizStarted: false,
         });
       })
 
