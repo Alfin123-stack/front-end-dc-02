@@ -22,9 +22,12 @@ const quizSlice = createSlice({
     },
 
     setTime(state, action) {
-      if (state.quizStarted) return;
+      // ⛔ JANGAN OVERRIDE TIME HASIL RESTORE
+      if (state.restored) return;
+
       state.timeLeft = action.payload;
     },
+
     startQuiz(state) {
       if (!state.quizLoaded) return;
       state.quizStarted = true;
@@ -36,6 +39,7 @@ const quizSlice = createSlice({
       state.userAnswers = [];
       state.submittedState = {};
       state.score = 0;
+      state.restored = false;
     },
 
     invalidateQuiz() {
@@ -85,12 +89,12 @@ const quizSlice = createSlice({
 
       if (!data) return;
 
-      console.log("Loaded local progress:", data);
       Object.assign(state, {
         currentQuestion: data.currentQuestion ?? 0,
         userAnswers: data.userAnswers ?? [],
         submittedState: data.submittedState ?? {},
         timeLeft: data.timeLeft ?? 30,
+        restored: true, // ✅ PENTING
       });
     },
 
@@ -170,6 +174,7 @@ const quizSlice = createSlice({
           userAnswers: data.userAnswers ?? [],
           submittedState: data.submittedState ?? {},
           timeLeft: data.timeLeft ?? 30,
+          restored: true, // ✅ PENTING
         });
       })
 

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import {
   answerQuestion,
+  clearProgress,
   loadProgress,
   nextQuestion,
   saveHistory,
@@ -55,6 +56,7 @@ export function useQuizEngine() {
   const restoring = useRef(true);
   const autosaveReady = useRef(false);
   const finishing = useRef(false);
+  const autosaveInterval = useRef(null);
   const mounted = useRef(true);
 
   const pendingSave = useRef(null);
@@ -62,9 +64,6 @@ export function useQuizEngine() {
   const saving = useRef(false);
   const lastState = useRef("");
 
-  /* ==========================================================
-     MOUNT / UNMOUNT FLAG
-  ========================================================== */
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -117,7 +116,6 @@ export function useQuizEngine() {
         }
       }
 
-      // ✅ SATU-SATUNYA TEMPAT SET TIME
       dispatch(setTime(getTimeByLevel(currentLevel)));
       console.log("Set time for level", currentLevel);
 
@@ -134,9 +132,6 @@ export function useQuizEngine() {
     };
   }, [tutorialId, userId, currentLevel, dispatch]);
 
-  /* ==========================================================
-     INITIAL SAVE (only once after quizStarted)
-  ========================================================== */
   useEffect(() => {
     if (!quizStarted) return;
     if (!autosaveReady.current) return;
@@ -174,6 +169,63 @@ export function useQuizEngine() {
   }, [quizStarted, dispatch]);
 
   /* ==========================================================
+   TIMEOUT HANDLER (TIME LEFT <= 0)
+========================================================== */
+  useEffect(() => {
+    if (!quizStarted) return;
+    if (timeLeft > 0) return;
+
+    console.warn("⏱️ TIME OVER — redirect to completion");
+
+    (async () => {
+      // ⛔ stop autosave & restore
+      autosaveReady.current = false;
+      restoring.current = true;
+
+      if (autosaveInterval.current) {
+        clearInterval(autosaveInterval.current);
+      }
+
+      // 🧹 HAPUS PROGRESS LOCAL
+      dispatch(
+        clearProgress({
+          tutorialId,
+          userId,
+          level: currentLevel,
+        })
+      );
+
+      // 🧹 HAPUS PROGRESS BACKEND
+      try {
+        await dispatch(
+          clearBackendQuiz({
+            tutorialId,
+            userId,
+            level: currentLevel,
+            progress: true,
+          })
+        ).unwrap();
+      } catch (err) {
+        console.warn("⚠️ Clear backend progress failed:", err);
+      }
+
+      // 🚀 REDIRECT (REPLACE)
+      navigate(
+        `/completion/${currentLevel}?tutorial=${tutorialId}&user=${userId}&timeout=1`,
+        { replace: true }
+      );
+    })();
+  }, [
+    timeLeft,
+    quizStarted,
+    tutorialId,
+    userId,
+    currentLevel,
+    dispatch,
+    navigate,
+  ]);
+
+  /* ==========================================================
      AUTOSAVE (DEBOUNCE)
   ========================================================== */
   const queueAutosave = useCallback(() => {
@@ -184,27 +236,36 @@ export function useQuizEngine() {
       currentQuestion,
       userAnswers,
       submittedState,
+      timeLeft,
     });
 
     if (lastState.current === key) return;
     lastState.current = key;
 
-    const snap = {
+    pendingSave.current = {
       currentQuestion,
       userAnswers,
       submittedState,
       timeLeft,
       updatedAt: new Date().toISOString(),
     };
+  }, [currentQuestion, userAnswers, submittedState, timeLeft]);
 
-    pendingSave.current = snap;
+  useEffect(() => {
+    if (!quizStarted) return;
+    queueAutosave();
+  }, [currentQuestion, userAnswers, submittedState, timeLeft, queueAutosave]);
 
-    if (saveTimer.current) clearTimeout(saveTimer.current);
+  useEffect(() => {
+    if (!quizStarted) return;
 
-    saveTimer.current = setTimeout(async () => {
-      if (!pendingSave.current || saving.current) return;
+    autosaveInterval.current = setInterval(async () => {
+      if (!autosaveReady.current) return;
+      if (!pendingSave.current) return;
+      if (saving.current) return;
 
       saving.current = true;
+
       try {
         await dispatch(
           saveProgressToBackend({
@@ -213,33 +274,19 @@ export function useQuizEngine() {
             level: currentLevel,
             progress: pendingSave.current,
           })
-        );
+        ).unwrap();
+
         pendingSave.current = null;
       } catch (err) {
         console.warn("⚠️ Autosave failed:", err);
       }
 
       saving.current = false;
-    }, 250);
-  }, [
-    currentQuestion,
-    userAnswers,
-    submittedState,
-    timeLeft,
-    tutorialId,
-    userId,
-    currentLevel,
-    dispatch,
-  ]);
+    }, 3000);
 
-  useEffect(() => {
-    if (!quizStarted) return;
-    queueAutosave();
-  }, [currentQuestion, userAnswers, submittedState, queueAutosave]);
+    return () => clearInterval(autosaveInterval.current);
+  }, [quizStarted, tutorialId, userId, currentLevel, dispatch]);
 
-  /* ==========================================================
-     FINISH QUIZ
-  ========================================================== */
   const handleFinish = useCallback(async () => {
     if (finishing.current) return;
     finishing.current = true;

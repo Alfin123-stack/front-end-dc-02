@@ -10,16 +10,10 @@ export function useStartScreen() {
   const dispatch = useDispatch();
   const mounted = useRef(true);
 
-  // ================================
-  // PARAMETER URL
-  // ================================
   const query = new URLSearchParams(location.search);
   const tutorialId = Number(query.get("tutorial") || 1);
   const userId = Number(query.get("user") || 1);
 
-  // ================================
-  // HEADING
-  // ================================
   useEffect(() => {
     if (!tutorialId) return;
     dispatch(loadTutorialHeading({ tutorialId }));
@@ -27,9 +21,6 @@ export function useStartScreen() {
 
   const heading = useSelector((state) => state.quiz.tutorialHeading);
 
-  // ================================
-  // PROGRESS STATE
-  // ================================
   const [levelStatus, setLevelStatus] = useState({});
   const [loadingStatus, setLoadingStatus] = useState(true);
 
@@ -48,7 +39,6 @@ export function useStartScreen() {
           return { level: lvl, hasProgress: true };
         }
 
-        // 2) BACKEND
         const res = await dispatch(
           loadProgressFromBackend({
             tutorialId,
@@ -89,9 +79,6 @@ export function useStartScreen() {
     return () => (mounted.current = false);
   }, [fetchProgressAll]);
 
-  // ================================
-  // START QUIZ
-  // ================================
   const handleStart = (level) => {
     navigate(`/quiz/${level}?tutorial=${tutorialId}&user=${userId}`);
   };

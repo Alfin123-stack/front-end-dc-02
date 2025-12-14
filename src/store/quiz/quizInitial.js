@@ -14,6 +14,7 @@ export const initialState = {
   currentQuestion: 0,
   timeLeft: 30,
 
+  restored: false,
   quizLoaded: false,
   score: 0,
   totalQuestions: 0,

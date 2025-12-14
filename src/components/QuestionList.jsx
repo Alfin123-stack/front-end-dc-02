@@ -8,19 +8,16 @@ export default function QuestionList({ quizData, userAnswers }) {
       {quizData.map((q, i) => (
         <QuestionCard
           key={i}
-          data={q} // data soal lengkap
-          index={i} // nomor soal
-          userAnswer={userAnswers[i] || []} // jawaban user
-          correctAnswer={q.correctAnswers || []} // jawaban benar
+          data={q} 
+          index={i}
+          userAnswer={userAnswers[i] || []} 
+          correctAnswer={q.correctAnswers || []}
         />
       ))}
     </div>
   );
 }
 
-/* ---------------------------------------------
-   PROP TYPES
----------------------------------------------- */
 QuestionList.propTypes = {
   quizData: PropTypes.arrayOf(
     PropTypes.shape({
@@ -31,7 +28,7 @@ QuestionList.propTypes = {
       correctAnswers: PropTypes.arrayOf(
         PropTypes.oneOfType([PropTypes.string, PropTypes.number])
       ).isRequired,
-      // kalau ada field extra, tambah di sini
+ 
     })
   ).isRequired,
 

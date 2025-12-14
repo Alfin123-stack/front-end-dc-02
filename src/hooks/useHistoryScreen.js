@@ -6,10 +6,11 @@ import {
   clearQuizHistory,
   getQuizHistory,
 } from "../store/quiz/thunks/quizCacheThunks";
+import { ITEMS_LIMIT } from "../utils/constants";
 
 export default function useHistoryScreen(tutorialId) {
   const dispatch = useDispatch();
-  const ITEMS_LIMIT = 3;
+
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [historyState, setHistoryState] = useState([]);
@@ -34,9 +35,6 @@ export default function useHistoryScreen(tutorialId) {
     };
   }, [dispatch]);
 
-  /* ===============================
-     FILTER & PAGINATION
-  =============================== */
   const filteredHistory = useMemo(
     () => getFilteredHistory(historyState, tutorialId),
     [historyState, tutorialId]

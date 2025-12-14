@@ -1,4 +1,3 @@
-// src/hooks/useReviewScreen.js
 import { useMemo } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,7 +18,6 @@ export default function useReviewScreen() {
 
   const { quizData, userAnswers, score } = useSelector((state) => state.quiz);
 
-  /** Restart quiz */
   const handleRestart = () => {
     dispatch(resetQuiz());
     dispatch(startQuiz());
@@ -28,7 +26,6 @@ export default function useReviewScreen() {
     });
   };
 
-  /** Back to result page */
   const handleBackToResult = () => {
     navigate(
       `/completion/${currentLevel}?tutorial=${tutorialId}&user=${userId}`,
@@ -38,7 +35,6 @@ export default function useReviewScreen() {
     );
   };
 
-  /** Empty state check */
   const isEmpty = useMemo(() => !quizData || quizData.length === 0, [quizData]);
 
   return {

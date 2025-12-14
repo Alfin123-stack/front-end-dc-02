@@ -6,19 +6,11 @@ import { fadeUp } from "../utils/animations";
 import { formatTimestamp, getPercentColor } from "../utils/helper";
 import AppButton from "./ui/AppButton";
 
-export default function QuizHeader({
-  mode, // "history" | "review"
-  timestamp, // hanya untuk history
-  percentage, // untuk keduanya
-  onBack, // hanya untuk history
-}) {
+export default function QuizHeader({ mode, timestamp, percentage, onBack }) {
   const percentColor = getPercentColor(percentage);
 
   return (
     <div className="mb-10">
-      {/* ------------------------------
-          HISTORY MODE (dengan tombol back)
-      -------------------------------- */}
       {mode === "history" && (
         <>
           <motion.div
@@ -56,9 +48,6 @@ export default function QuizHeader({
         </>
       )}
 
-      {/* ------------------------------
-          REVIEW MODE
-      -------------------------------- */}
       {mode === "review" && (
         <motion.div
           variants={fadeUp}
@@ -86,9 +75,6 @@ export default function QuizHeader({
   );
 }
 
-/* -------------------------------------
-   PROP TYPES
--------------------------------------- */
 QuizHeader.propTypes = {
   mode: PropTypes.oneOf(["history", "review"]).isRequired,
 

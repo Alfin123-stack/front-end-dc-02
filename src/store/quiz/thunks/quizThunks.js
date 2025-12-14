@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { saveQuizCache, normalizeQuiz, loadQuizCache } from "../quizUtils";
-import { staticQuizResponse } from "../../../utils/constants";
 import { saveQuizCacheToBackend } from "./quizCacheThunks";
 
 export const loadTutorialHeading = createAsyncThunk(
@@ -99,26 +98,6 @@ export const loadQuiz = createAsyncThunk(
       } catch (err) {
         console.warn("Generate API failed:", err?.message);
       }
-
-      const resp = staticQuizResponse;
-      const fallback = {
-        tutorial: resp.tutorial,
-        meta: resp.meta,
-        quizData: normalizeQuiz(resp.quiz),
-      };
-
-      saveQuizCache(uID, tID, lvl, fallback);
-
-      dispatch(
-        saveQuizCacheToBackend({
-          tutorialId: tID,
-          userId: uID,
-          level: lvl,
-          quiz: fallback,
-        })
-      );
-
-      return wrap(fallback);
     } catch (err) {
       return rejectWithValue(err?.message || "Terjadi kesalahan.");
     }

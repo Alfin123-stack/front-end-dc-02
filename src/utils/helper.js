@@ -1,3 +1,5 @@
+import { htmlToText } from "html-to-text";
+
 export const getProgressColor = (p) => {
   if (p >= 80) return "bg-[#155dfc]";
   if (p >= 50) return "bg-green-500";
@@ -108,3 +110,36 @@ export const difficultyMap = {
   2: "Sedang",
   3: "Sulit",
 };
+
+export function getOptionHighlight({ isUser, isCorrect }) {
+  if (isUser && isCorrect) {
+    return "border-green-500 bg-green-50 dark:bg-green-900/20";
+  }
+
+  if (isUser && !isCorrect) {
+    return "border-red-500 bg-red-50 dark:bg-red-900/20";
+  }
+
+  if (isCorrect) {
+    return "border-green-400 bg-green-50 dark:bg-green-900/10";
+  }
+
+  return "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#0f172a]";
+}
+
+export function shouldShowOptionFeedback({
+  showFeedback,
+  isUser,
+  isCorrect,
+  feedback,
+}) {
+  if (typeof showFeedback === "boolean") return showFeedback;
+  return (isUser || isCorrect) && Boolean(feedback);
+}
+
+export function toPlainText(html) {
+  return htmlToText(html ?? "", {
+    wordwrap: false,
+    selectors: [{ selector: "img", format: "skip" }],
+  });
+}

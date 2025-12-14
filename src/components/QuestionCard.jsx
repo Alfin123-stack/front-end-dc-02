@@ -34,7 +34,6 @@ export default function QuestionCard({
         border border-black/10 dark:border-white/10
         shadow-[0_8px_40px_rgba(0,0,0,0.06)]
       ">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           {isCorrect ? (
@@ -58,12 +57,10 @@ export default function QuestionCard({
         </span>
       </div>
 
-      {/* Question Text */}
       <p className="text-base font-semibold mb-4">
         {htmlToText(question.question)}
       </p>
 
-      {/* Options */}
       <div className="space-y-3">
         {question.options.map((opt) => {
           const isUser = userAns.includes(opt.key);
@@ -87,9 +84,6 @@ export default function QuestionCard({
   );
 }
 
-/* -----------------------------------------
-   PropTypes
------------------------------------------- */
 QuestionCard.propTypes = {
   data: PropTypes.shape({
     question: PropTypes.string.isRequired,

@@ -14,7 +14,6 @@ export default function useQuizScreen({
 
   const { quizData, currentQuestion, userAnswers, submittedState } = data;
 
-  // Current question data
   const q = useMemo(
     () => quizData?.[currentQuestion] || null,
     [quizData, currentQuestion]
@@ -22,17 +21,14 @@ export default function useQuizScreen({
 
   const selected = userAnswers?.[currentQuestion] || [];
 
-  // Autosave at mount
   useEffect(() => {
     if (typeof onAutosaveInit === "function") onAutosaveInit();
   }, []);
 
-  // Restore submitted state on question change
   useEffect(() => {
     setShowResult(Boolean(submittedState?.[currentQuestion]));
   }, [currentQuestion, submittedState]);
 
-  /* =============== ANSWER HANDLING =============== */
   const updateAnswer = (arr) => {
     if (!q) return;
     onAnswer(arr);
@@ -55,7 +51,6 @@ export default function useQuizScreen({
     updateAnswer([...selected.slice(1), key]);
   };
 
-  /* =============== SUBMIT =============== */
   const handleSubmit = () => {
     if (lockAction || !q) return;
 
@@ -66,7 +61,6 @@ export default function useQuizScreen({
     setTimeout(() => setLockAction(false), 260);
   };
 
-  /* =============== NEXT =============== */
   const handleNext = () => {
     if (lockAction || !q) return;
 
@@ -81,7 +75,6 @@ export default function useQuizScreen({
     }
   };
 
-  /* =============== DERIVED STATE =============== */
   const isMultiple = q?.type === "multiple_answer";
   const requiredAnswers = q?.correctAnswers?.length || 1;
 
