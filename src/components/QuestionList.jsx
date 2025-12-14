@@ -3,14 +3,16 @@ import PropTypes from "prop-types";
 import QuestionCard from "./QuestionCard";
 
 export default function QuestionList({ quizData, userAnswers }) {
+  console.log("Rendering QuestionList with quizData:", quizData);
+  console.log("User Answers:", userAnswers);
   return (
     <div className="space-y-8">
       {quizData.map((q, i) => (
         <QuestionCard
           key={i}
-          data={q} 
+          data={q}
           index={i}
-          userAnswer={userAnswers[i] || []} 
+          userAnswer={userAnswers[i] || []}
           correctAnswer={q.correctAnswers || []}
         />
       ))}
@@ -28,7 +30,6 @@ QuestionList.propTypes = {
       correctAnswers: PropTypes.arrayOf(
         PropTypes.oneOfType([PropTypes.string, PropTypes.number])
       ).isRequired,
- 
     })
   ).isRequired,
 

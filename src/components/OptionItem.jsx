@@ -1,14 +1,46 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
-
+import { htmlToText } from "html-to-text";
 import { HiMiniCheckCircle, HiMiniXCircle } from "react-icons/hi2";
-import {
-  getOptionHighlight,
-  shouldShowOptionFeedback,
-  toPlainText,
-} from "../utils/helper";
 
+/* =====================================
+   HELPERS
+===================================== */
+const getOptionHighlight = (isUser, isCorrect) => {
+  if (isUser && isCorrect) {
+    return "border-green-500 bg-green-50 dark:bg-green-900/20";
+  }
+
+  if (isUser && !isCorrect) {
+    return "border-red-500 bg-red-50 dark:bg-red-900/20";
+  }
+
+  if (isCorrect) {
+    return "border-green-400 bg-green-50 dark:bg-green-900/10";
+  }
+
+  return "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#0f172a]";
+};
+
+const shouldShowOptionFeedback = (
+  showFeedback,
+  isUser,
+  isCorrect,
+  feedback
+) => {
+  if (typeof showFeedback === "boolean") return showFeedback;
+  return (isUser || isCorrect) && Boolean(feedback);
+};
+
+const toPlainText = (html) =>
+  htmlToText(html ?? "", {
+    wordwrap: false,
+  });
+
+/* =====================================
+   COMPONENT
+===================================== */
 export default function OptionItem({
   opt,
   isUser,

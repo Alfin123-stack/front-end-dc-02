@@ -169,63 +169,6 @@ export function useQuizEngine() {
   }, [quizStarted, dispatch]);
 
   /* ==========================================================
-   TIMEOUT HANDLER (TIME LEFT <= 0)
-========================================================== */
-  useEffect(() => {
-    if (!quizStarted) return;
-    if (timeLeft > 0) return;
-
-    console.warn("⏱️ TIME OVER — redirect to completion");
-
-    (async () => {
-      // ⛔ stop autosave & restore
-      autosaveReady.current = false;
-      restoring.current = true;
-
-      if (autosaveInterval.current) {
-        clearInterval(autosaveInterval.current);
-      }
-
-      // 🧹 HAPUS PROGRESS LOCAL
-      dispatch(
-        clearProgress({
-          tutorialId,
-          userId,
-          level: currentLevel,
-        })
-      );
-
-      // 🧹 HAPUS PROGRESS BACKEND
-      try {
-        await dispatch(
-          clearBackendQuiz({
-            tutorialId,
-            userId,
-            level: currentLevel,
-            progress: true,
-          })
-        ).unwrap();
-      } catch (err) {
-        console.warn("⚠️ Clear backend progress failed:", err);
-      }
-
-      // 🚀 REDIRECT (REPLACE)
-      navigate(
-        `/completion/${currentLevel}?tutorial=${tutorialId}&user=${userId}&timeout=1`,
-        { replace: true }
-      );
-    })();
-  }, [
-    timeLeft,
-    quizStarted,
-    tutorialId,
-    userId,
-    currentLevel,
-    dispatch,
-    navigate,
-  ]);
-
-  /* ==========================================================
      AUTOSAVE (DEBOUNCE)
   ========================================================== */
   const queueAutosave = useCallback(() => {
@@ -390,6 +333,18 @@ export function useQuizEngine() {
     dispatch,
     navigate,
   ]);
+
+  /* ==========================================================
+   TIMEOUT HANDLER (TIME LEFT <= 0)
+========================================================== */
+  useEffect(() => {
+    if (!quizStarted) return;
+    if (timeLeft > 0) return;
+
+    console.warn("⏱️ TIME OVER → auto finish");
+
+    handleFinish();
+  }, [timeLeft, quizStarted, handleFinish]);
 
   /* ==========================================================
      HANDLERS

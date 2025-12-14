@@ -17,9 +17,13 @@ export default function QuestionCard({
   const userAns = userAnswer || [];
   const correctAns = correctAnswer || [];
 
+  console.log("Rendering QuestionCard:", { index, userAns, correctAns });
+
   const isCorrect =
     userAns.length === correctAns.length &&
     userAns.every((a) => correctAns.includes(a));
+
+  console.log("QuestionCard isCorrect:", isCorrect);
 
   return (
     <motion.div
