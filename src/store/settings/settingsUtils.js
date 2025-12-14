@@ -1,6 +1,3 @@
-// src/store/settings/settingsUtils.js
-
-// ---------------- MAPPER ----------------
 export const mapBackendPreferences = (prefs = {}) => {
   const mapped = {};
 
@@ -21,14 +18,12 @@ export const mapBackendPreferences = (prefs = {}) => {
   return mapped;
 };
 
-// ---------------- APPLY THEME ----------------
 export const applyThemeToHtml = (theme) => {
   const root = document.documentElement;
   if (theme === "dark") root.classList.add("dark");
   else root.classList.remove("dark");
 };
 
-// ---------------- APPLY FONT SIZE ----------------
 export const applyFontSizeToHtml = (fontSize) => {
   const root = document.documentElement;
 
@@ -39,7 +34,6 @@ export const applyFontSizeToHtml = (fontSize) => {
   else root.classList.add("font-medium");
 };
 
-// ---------------- SAVE LOCAL STORAGE ----------------
 export const saveToLocalStorage = (state) => {
   const cloned = { ...state };
   delete cloned.status;

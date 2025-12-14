@@ -1,11 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
-import {
-  loadProgressFromBackend,
-  loadTutorialHeading,
-} from "../store/quiz/quizThunks";
+import { loadTutorialHeading } from "../store/quiz/thunks/quizThunks";
+import { loadProgressFromBackend } from "../store/quiz/thunks/quizCacheThunks";
 
 export function useStartScreen() {
   const navigate = useNavigate();

@@ -6,11 +6,9 @@ import {
 } from "./quizUtils";
 
 import { initialState } from "./quizInitial";
-import {
-  loadProgressFromBackend,
-  loadQuiz,
-  loadTutorialHeading,
-} from "./quizThunks";
+import { loadQuiz, loadTutorialHeading } from "./thunks/quizThunks";
+import { loadProgressFromBackend } from "./thunks/quizCacheThunks";
+
 
 const quizSlice = createSlice({
   name: "quiz",
@@ -21,7 +19,6 @@ const quizSlice = createSlice({
     },
 
     setTime(state, action) {
-      console.log("SET TIME PAYLOAD", action.payload);
       state.timeLeft = action.payload;
     },
 
@@ -29,9 +26,6 @@ const quizSlice = createSlice({
       state.quizStarted = true;
     },
 
-    /* -----------------------------------------------------
-       RESET QUIZ (SOFT RESET SAAT USER RESTART)
-    ------------------------------------------------------*/
     resetQuiz(state) {
       state.quizStarted = false;
       state.currentQuestion = 0;
@@ -39,12 +33,8 @@ const quizSlice = createSlice({
       state.userAnswers = [];
       state.submittedState = {};
       state.score = 0;
-      // totalQuestions tidak perlu direset
     },
 
-    /* -----------------------------------------------------
-       INVALIDATE QUIZ (CLEAR STATE LENGKAP)
-    ------------------------------------------------------*/
     invalidateQuiz() {
       return {
         ...initialState,
@@ -52,9 +42,6 @@ const quizSlice = createSlice({
       };
     },
 
-    /* -----------------------------------------------------
-       JAWABAN USER
-    ------------------------------------------------------*/
     answerQuestion(state, action) {
       state.userAnswers[state.currentQuestion] = action.payload;
     },
@@ -74,9 +61,6 @@ const quizSlice = createSlice({
       state.totalQuestions = action.payload.totalQuestions;
     },
 
-    /* -----------------------------------------------------
-       PROGRESS: SAVE (LOCAL)
-    ------------------------------------------------------*/
     saveProgress(state, action) {
       const { tutorialId, userId, level } = action.payload;
 
@@ -90,11 +74,8 @@ const quizSlice = createSlice({
       saveLocalProgress(userId, tutorialId, level, snapshot);
     },
 
-    /* -----------------------------------------------------
-       PROGRESS: LOAD (LOCAL)
-    ------------------------------------------------------*/
     loadProgress(state, action) {
-      if (!state.quizLoaded) return; // FIX race condition
+      if (!state.quizLoaded) return;
 
       const { tutorialId, userId, level } = action.payload;
       const data = loadLocalProgress(userId, tutorialId, level);
@@ -109,17 +90,11 @@ const quizSlice = createSlice({
       });
     },
 
-    /* -----------------------------------------------------
-       PROGRESS: CLEAR (LOCAL)
-    ------------------------------------------------------*/
     clearProgress(state, action) {
       const { tutorialId, userId, level } = action.payload;
       deleteLocalProgress(userId, tutorialId, level);
     },
 
-    /* -----------------------------------------------------
-       HISTORY
-    ------------------------------------------------------*/
     saveHistory(state, action) {
       const {
         tutorialId,
@@ -149,21 +124,16 @@ const quizSlice = createSlice({
     },
   },
 
-  /* ---------------------------------------------------------
-     EXTRA REDUCERS (THUNKS)
-  ----------------------------------------------------------*/
   extraReducers: (builder) => {
     builder
-      /* -----------------------------------------------------
-         LOAD QUIZ
-      ------------------------------------------------------*/
+
       .addCase(loadQuiz.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
 
       .addCase(loadQuiz.fulfilled, (state, action) => {
-        const { data = {} } = action.payload || {}; // FIX destructure aman
+        const { data = {} } = action.payload || {};
 
         if (!data) {
           state.isLoading = false;
@@ -171,7 +141,6 @@ const quizSlice = createSlice({
           return;
         }
 
-        // reset state quiz saat load quiz baru
         Object.assign(state, {
           isLoading: false,
           quizLoaded: true,
@@ -180,7 +149,6 @@ const quizSlice = createSlice({
           meta: data.meta ?? {},
           quizData: data.quizData ?? [],
 
-          // reset progress
           currentQuestion: 0,
           userAnswers: [],
           submittedState: {},
@@ -194,11 +162,8 @@ const quizSlice = createSlice({
         state.error = action.payload;
       })
 
-      /* -----------------------------------------------------
-         LOAD PROGRESS (BACKEND)
-      ------------------------------------------------------*/
       .addCase(loadProgressFromBackend.fulfilled, (state, action) => {
-        if (!state.quizLoaded) return; // FIX race condition
+        if (!state.quizLoaded) return;
         if (!action.payload) return;
 
         const data = action.payload;
@@ -211,9 +176,6 @@ const quizSlice = createSlice({
         });
       })
 
-      /* -----------------------------------------------------
-         LOAD TUTORIAL HEADING
-      ------------------------------------------------------*/
       .addCase(loadTutorialHeading.fulfilled, (state, action) => {
         state.tutorialHeading = action.payload;
       })
@@ -224,7 +186,6 @@ const quizSlice = createSlice({
   },
 });
 
-/* SELECTOR */
 export const selectScore = createSelector(
   (state) => state.quiz.score,
   (state) => state.quiz.totalQuestions,

@@ -15,16 +15,16 @@ import {
   tick,
 } from "../store/quiz/quizSlice";
 
-import {
-  clearBackendQuiz,
-  loadProgressFromBackend,
-  loadQuiz,
-  saveProgressToBackend,
-} from "../store/quiz/quizThunks";
-
 import { loadLocalProgress } from "../store/quiz/quizUtils";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getTimeByLevel } from "../utils/helper";
+import { loadQuiz } from "../store/quiz/thunks/quizThunks";
+import {
+  clearBackendQuiz,
+  loadProgressFromBackend,
+  saveProgressToBackend,
+  saveQuizHistory,
+} from "../store/quiz/thunks/quizCacheThunks";
 
 export function useQuizEngine() {
   const navigate = useNavigate();
@@ -80,9 +80,10 @@ export function useQuizEngine() {
       autosaveReady.current = false;
 
       try {
-        await dispatch(
+        const quiz = dispatch(
           loadQuiz({ tutorialId, userId, level: currentLevel })
-        ).unwrap();
+        );
+        console.log("Loaded quiz:", quiz);
       } catch (err) {
         console.warn("⚠️ Load quiz failed:", err);
       }
@@ -285,6 +286,22 @@ export function useQuizEngine() {
     const finalScore = Math.round((raw / quizData.length) * 100);
 
     dispatch(setScore({ score: finalScore, totalQuestions: quizData.length }));
+
+    // ✅ SIMPAN KE REDIS (BACKEND)
+try {
+  await dispatch(
+    saveQuizHistory({
+      tutorialId,
+      quizData,
+      userAnswers,
+      score: finalScore,
+      level: currentLevel,
+      totalQuestions: quizData.length,
+    })
+  ).unwrap();
+} catch (err) {
+  console.warn("⚠️ Save history failed:", err);
+}
 
     dispatch(
       saveHistory({

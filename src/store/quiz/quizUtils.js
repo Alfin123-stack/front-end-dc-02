@@ -1,6 +1,3 @@
-/* =====================================================
-   LOCALSTORAGE SAFE HELPERS
-======================================================*/
 const safeSet = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
@@ -27,9 +24,6 @@ const safeRemove = (key) => {
   }
 };
 
-/* =====================================================
-   KEY GENERATOR
-======================================================*/
 export const quizCacheKey = (userId, tutorialId, level) =>
   `quiz_cache:${userId}:${tutorialId}:${level}`;
 
@@ -38,9 +32,6 @@ export const progressKey = (userId, tutorialId, level) =>
 
 export const HISTORY_KEY = "quiz_history";
 
-/* =====================================================
-   QUIZ CACHE (per user + tutorial + level)
-======================================================*/
 export const saveQuizCache = (userId, tutorialId, level, data) =>
   safeSet(quizCacheKey(userId, tutorialId, level), data);
 
@@ -50,9 +41,6 @@ export const loadQuizCache = (userId, tutorialId, level) =>
 export const deleteQuizCache = (userId, tutorialId, level) =>
   safeRemove(quizCacheKey(userId, tutorialId, level));
 
-/* =====================================================
-   PROGRESS (per user + tutorial + level)
-======================================================*/
 export const saveLocalProgress = (userId, tutorialId, level, data) =>
   safeSet(progressKey(userId, tutorialId, level), data);
 
@@ -62,22 +50,28 @@ export const loadLocalProgress = (userId, tutorialId, level) =>
 export const deleteLocalProgress = (userId, tutorialId, level) =>
   safeRemove(progressKey(userId, tutorialId, level));
 
-/* =====================================================
-   HISTORY (GLOBAL)
-======================================================*/
-export const loadHistory = () => safeGet(HISTORY_KEY, []);
+export const loadHistory = () => {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  } catch {
+    return [];
+  }
+};
 
 export const saveHistory = (entry) => {
   const list = loadHistory();
-  list.unshift(entry); // data terbaru paling atas
-  safeSet(HISTORY_KEY, list);
+  list.unshift(entry);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
 };
 
-export const clearHistory = () => safeRemove(HISTORY_KEY);
+export const replaceHistory = (list) => {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list || []));
+};
 
-/* =====================================================
-   NORMALIZATION
-======================================================*/
+export const clearHistory = () => {
+  localStorage.removeItem(HISTORY_KEY);
+};
+
 export const normalizeQuiz = (quizList = []) => {
   if (!Array.isArray(quizList)) return [];
 

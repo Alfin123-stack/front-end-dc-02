@@ -9,6 +9,7 @@ import HistoryPagination from "./history/HistoryPagination";
 
 import EmptyState from "../ui/EmptyState";
 import useHistoryScreen from "../../hooks/useHistoryScreen";
+import LoadingState from "../ui/LoadingState";
 
 export default function HistoryScreen() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function HistoryScreen() {
   const userId = Number(query.get("user") || 1);
 
   const {
+    loading,
     showConfirm,
     setShowConfirm,
     filteredHistory,
@@ -38,30 +40,49 @@ export default function HistoryScreen() {
           setShowConfirm={setShowConfirm}
         />
 
-        {filteredHistory.length === 0 && (
+        {/* ===============================
+            LOADING STATE
+        =============================== */}
+        {loading && (
+          <div className="mt-6">
+            <LoadingState message="Memuat riwayat quiz..." />
+          </div>
+        )}
+
+        {/* ===============================
+            EMPTY STATE
+        =============================== */}
+        {!loading && filteredHistory.length === 0 && (
           <EmptyState message="Belum ada riwayat untuk tutorial ini." />
         )}
 
-        <div className="space-y-5">
-          {paginatedHistory.map((item, i) => (
-            <HistoryItemCard
-              key={item.id}
-              item={item}
-              index={i}
-              tutorialId={tutorialId}
-              userId={userId}
-              navigate={navigate}
-            />
-          ))}
-        </div>
+        {/* ===============================
+            HISTORY LIST
+        =============================== */}
+        {!loading && filteredHistory.length > 0 && (
+          <>
+            <div className="space-y-5 mt-6">
+              {paginatedHistory.map((item, i) => (
+                <HistoryItemCard
+                  key={item.id}
+                  item={item}
+                  index={i}
+                  tutorialId={tutorialId}
+                  userId={userId}
+                  navigate={navigate}
+                />
+              ))}
+            </div>
 
-        {filteredHistory.length > 3 && (
-          <HistoryPagination
-            page={page}
-            totalPages={totalPages}
-            prevPage={prevPage}
-            nextPage={nextPage}
-          />
+            {filteredHistory.length > 3 && (
+              <HistoryPagination
+                page={page}
+                totalPages={totalPages}
+                prevPage={prevPage}
+                nextPage={nextPage}
+              />
+            )}
+          </>
         )}
       </div>
 

@@ -11,7 +11,7 @@ import CompletionMessage from "./completion/CompletionMessage";
 import CompletionButtons from "./completion/CompletionButtons";
 
 import { selectScore } from "../../store/quiz/quizSlice";
-import { clearBackendQuiz } from "../../store/quiz/quizThunks";
+
 import { deleteQuizCache } from "../../store/quiz/quizUtils";
 import {
   calcScorePercentage,
@@ -19,6 +19,7 @@ import {
   scoreColorHex,
   scoreColorText,
 } from "../../utils/helper";
+import { clearBackendQuiz } from "../../store/quiz/thunks/quizCacheThunks";
 
 export default function CompletionScreen() {
   const navigate = useNavigate();

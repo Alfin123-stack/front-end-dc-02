@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
@@ -31,7 +30,6 @@ export default function App() {
       <PersistGate loading={null} persistor={persistor}>
         <LoadUserPreferences />
 
-        {/* Router utama */}
         <AppRouter />
       </PersistGate>
     </Provider>

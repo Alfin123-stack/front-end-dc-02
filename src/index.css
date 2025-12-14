@@ -1,16 +1,8 @@
-/* =====================================
-   TAILWIND IMPORT (WAJIB URUT BEGINI)
-===================================== */
 @tailwind base;
 @tailwind components;
 
-/* =====================================
-   CUSTOM STYLES (ASLI + PERBAIKAN)
-===================================== */
-
-/* LAYOUT WIDTH */
 .screen-mediumWidth {
-  max-width: 780px !important; /* 850 → 780 supaya pas di iframe */
+  max-width: 780px !important;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -25,7 +17,6 @@
   padding: 0;
 }
 
-/* FONT FAMILY */
 .font-default {
   font-family: Arial, sans-serif !important;
 }
@@ -38,39 +29,22 @@
   font-family: "Open-Dyslexic", sans-serif !important;
 }
 
-/* =====================================
-   GLOBAL FONT SCALE (ROOT)
-===================================== */
-
-/* default (medium) */
 :root {
   --font-scale: 1;
 }
 
-/* small */
 .font-small {
   --font-scale: 0.9 !important;
 }
 
-/* medium */
 .font-medium {
   --font-scale: 1 !important;
 }
 
-/* large */
 .font-large {
   --font-scale: 1.15 !important;
 }
 
-/* =====================================
-   GLOBAL FONT (FLEXIBLE FOR IFRAME)
-===================================== */
-
-/* 
-   FIX terbesar: font-size default terlalu besar ketika di iframe.
-   Solusi: turunkan base 16px → 15px
-   Tapi tetap memakai scale setting milik kamu.
-*/
 html,
 body {
   font-size: calc(15px * var(--font-scale)) !important;
@@ -80,17 +54,13 @@ body {
   padding: 0;
 }
 
-/* =====================================
-   OPTIMASI HEADING (BIAR NGGA KEGEDEAN)
-===================================== */
-
 h1 {
-  font-size: calc(1.6rem * var(--font-scale)) !important; /* ~24px */
+  font-size: calc(1.6rem * var(--font-scale)) !important;
   font-weight: 800 !important;
 }
 
 h2 {
-  font-size: calc(1.35rem * var(--font-scale)) !important; /* ~20-22px */
+  font-size: calc(1.35rem * var(--font-scale)) !important;
   font-weight: 700 !important;
 }
 
@@ -106,21 +76,12 @@ li {
   margin-bottom: 0.35rem;
 }
 
-/* =====================================
-   TOASTER THEME
-===================================== */
 :root {
   --toast-bg: #ffffff;
   --toast-text: #111827;
   --toast-border: rgba(0, 0, 0, 0.15);
 }
 
-/* =====================================
-   TAILWIND DARK VARIANT
-===================================== */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* =====================================
-   TAILWIND UTILITIES
-===================================== */
 @tailwind utilities;

@@ -1,5 +1,3 @@
-// src/store/settings/settingsSlice.js
-
 import { createSlice } from "@reduxjs/toolkit";
 import { initialState } from "./settingsInitial";
 import {

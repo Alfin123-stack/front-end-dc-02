@@ -13,7 +13,6 @@ import Layout from "../components/Layout";
 import HistoryPage from "../pages/HistoryPage";
 import HistoryDetailPage from "../pages/HistoryDetailPage";
 
-// ⬅️ Tambahan baru
 import NotFoundPage from "../pages/NotFoundPage";
 import ErrorPage from "../pages/ErrorPage";
 
@@ -57,11 +56,9 @@ export default function AppRouter() {
 
             <Route path="/settings" element={<SettingsPage />} />
 
-            {/* History List + Detail */}
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/history/:id" element={<HistoryDetailPage />} />
 
-            {/* NOT FOUND PAGE */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Layout>

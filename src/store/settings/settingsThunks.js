@@ -1,5 +1,3 @@
-// src/store/settings/settingsThunks.js
-
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const fetchUserPreferences = createAsyncThunk(

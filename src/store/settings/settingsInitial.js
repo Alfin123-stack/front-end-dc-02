@@ -1,5 +1,3 @@
-// src/store/settings/settingsInitial.js
-
 export const defaultSettings = {
   theme: "light",
   fontFamily: "default",

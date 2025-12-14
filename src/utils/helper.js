@@ -37,9 +37,6 @@ export const formatTimestamp = (ts) => {
   });
 };
 
-/* ===============================
-    SCORE HELPERS
-================================ */
 export const calcScorePercentage = (score) =>
   score <= 1 ? Math.round(score * 100) : Math.round(score);
 
@@ -55,9 +52,6 @@ export const scoreColorText = {
   green: "text-green-500 dark:text-green-400",
 };
 
-/* ===============================
-    LEVEL HELPERS
-================================ */
 export const allowNextLevel = (percentage, currentLevel) =>
   percentage >= 60 && currentLevel < 3;
 
