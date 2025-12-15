@@ -5,8 +5,15 @@
 ![Vite](https://img.shields.io/badge/Vite-7.x-purple?logo=vite)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![Redux](https://img.shields.io/badge/Redux%20Toolkit-2.x-764ABC?logo=redux)
+![Vite](https://img.shields.io/badge/Vite-7.x-purple?logo=vite)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![Redux](https://img.shields.io/badge/Redux%20Toolkit-2.x-764ABC?logo=redux)
+![React%20Router](https://img.shields.io/badge/React%20Router-7.x-CA4245?logo=reactrouter)
+![Redux%20Persist](https://img.shields.io/badge/Redux%20Persist-6.x-764ABC)
+![Axios](https://img.shields.io/badge/Axios-1.x-5A29E4?logo=axios)
+![Framer%20Motion](https://img.shields.io/badge/Framer%20Motion-12.x-black?logo=framer)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-blue?logo=tailwindcss)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3?logo=eslint)
 
 ---
 
@@ -133,11 +140,3 @@ http://localhost:5173/?tutorial=yourTutorialId&user=yourUserId
   * Feedback adaptif
 
 ---
-
-## 📜 License
-
-Project ini menggunakan lisensi **MIT** — bebas digunakan untuk pembelajaran dan pengembangan lanjutan.
-
----
-
-🚀 *Learn smarter, not harder — with LearnCheck!*
