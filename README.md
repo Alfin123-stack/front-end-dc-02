@@ -1,4 +1,4 @@
-# 🎓 WEB-DEVELOPER-QUIZ (LearnCheck!)
+# 🎓 QUIZ (LearnCheck!)
 
 *Formative Assessment Powered with AI*
 
