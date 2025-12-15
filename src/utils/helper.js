@@ -143,3 +143,6 @@ export function toPlainText(html) {
     selectors: [{ selector: "img", format: "skip" }],
   });
 }
+
+export const getDetailHistory = (history, idDetail) =>
+  history.find((h) => String(h.id) === String(idDetail));

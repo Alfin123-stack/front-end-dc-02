@@ -33,7 +33,6 @@ export function useStartScreen() {
       const key = `quiz_progress:${userId}:${tutorialId}:${lvl}`;
 
       try {
-        // 1) LOCAL
         const local = localStorage.getItem(key);
         if (local) {
           return { level: lvl, hasProgress: true };

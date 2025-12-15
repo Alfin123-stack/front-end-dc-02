@@ -64,25 +64,27 @@ export const saveHistory = (entry) => {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
 };
 
-export const replaceHistory = (list) => {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(list || []));
-};
-
 export const clearHistory = () => {
   localStorage.removeItem(HISTORY_KEY);
 };
+
+const INDEX_TO_LETTER = ["A", "B", "C", "D", "E"];
 
 export const normalizeQuiz = (quizList = []) => {
   if (!Array.isArray(quizList)) return [];
 
   return quizList
     .map((q) => {
-      const opts = Object.entries(q.options || {}).map(([key, opt]) => ({
-        key,
-        text: opt?.text ?? "",
-        isCorrect: opt?.isCorrect ?? false,
-        feedback: opt?.feedback ?? "",
-      }));
+      const opts = Object.entries(q.options || {}).map(([key, opt]) => {
+        const fixedKey = /^\d+$/.test(key) ? INDEX_TO_LETTER[Number(key)] : key;
+
+        return {
+          key: fixedKey,
+          text: opt?.text ?? "",
+          isCorrect: opt?.isCorrect ?? false,
+          feedback: opt?.feedback ?? "",
+        };
+      });
 
       return {
         id: q.id,

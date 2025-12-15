@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
-import { selectSettings } from "../store/settings/settingsSlice";
+import { selectSettings } from "../store/settings/settingsSelector";
+
 
 export default function Layout({ children }) {
   const settings = useSelector(selectSettings);

@@ -16,7 +16,6 @@ export default function StartScreenLevelCard({
       className="p-6 rounded-2xl cursor-pointer bg-white dark:bg-gray-800
                  border border-gray-200 dark:border-gray-700
                  hover:bg-gray-100 hover:dark:bg-gray-700 transition-all relative">
-      {/* BADGE */}
       <div className="absolute -top-2 -right-2 translate-x-1">
         {badge && (
           <span

@@ -1,4 +1,3 @@
-// src/components/quiz/ActionButtons.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { FiSend, FiArrowRight } from "react-icons/fi";

@@ -42,12 +42,9 @@ export default function ScoreRing({ percentage, color, colorHex, colorText }) {
   );
 }
 
-/* ============================
-   PROP TYPES
-============================ */
 ScoreRing.propTypes = {
   percentage: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired, // "red" | "yellow" | "green"
+  color: PropTypes.string.isRequired,
   colorHex: PropTypes.objectOf(PropTypes.string).isRequired,
   colorText: PropTypes.objectOf(PropTypes.string).isRequired,
 };

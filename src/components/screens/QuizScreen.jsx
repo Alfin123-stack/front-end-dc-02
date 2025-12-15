@@ -4,7 +4,7 @@ import { AnimatePresence } from "framer-motion";
 
 import QuizHeader from "./quiz/QuizHeader";
 import QuizProgress from "./quiz/QuizProgress";
-import QuestionCard from "./quiz/QuestionCard";
+import QuestionCard from "./quiz/QuizCard";
 import { getProgressColor } from "../../utils/helper";
 import useQuizScreen from "../../hooks/useQuizScreen";
 import { fadeInUp, fadeSlide } from "../../utils/animations";
@@ -24,6 +24,7 @@ export default function QuizScreen(props) {
     allowSubmit,
     progress,
   } = useQuizScreen(props);
+
 
   const { tutorial, quizData, currentQuestion, timeLeft } = data;
 

@@ -14,6 +14,11 @@ export const initialState = {
   currentQuestion: 0,
   timeLeft: 30,
 
+  history: {
+    list: [],
+    loading: false,
+  },
+
   restored: false,
   quizLoaded: false,
   score: 0,

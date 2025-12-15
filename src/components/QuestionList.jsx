@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import QuestionCard from "./QuestionCard";
 
 export default function QuestionList({ quizData, userAnswers }) {
-  console.log("Rendering QuestionList with quizData:", quizData);
-  console.log("User Answers:", userAnswers);
   return (
     <div className="space-y-8">
       {quizData.map((q, i) => (

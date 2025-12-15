@@ -11,7 +11,6 @@ export default function HistoryHeader({
 }) {
   return (
     <div className="flex items-center justify-between mb-8">
-      {/* Tombol Kembali */}
       <motion.div
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}>
@@ -24,7 +23,6 @@ export default function HistoryHeader({
         </AppButton>
       </motion.div>
 
-      {/* Tombol Hapus Riwayat */}
       {filteredLength > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -6 }}

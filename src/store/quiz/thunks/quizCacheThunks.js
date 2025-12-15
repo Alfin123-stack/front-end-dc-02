@@ -4,35 +4,33 @@ import {
   clearHistory,
   loadHistory,
   loadLocalProgress,
-  replaceHistory,
   saveLocalProgress,
 } from "../quizUtils";
 
 export const saveQuizCacheToBackend = createAsyncThunk(
   "quiz/saveBackendQuizCache",
   async ({ tutorialId, userId, level, quiz }, { rejectWithValue }) => {
+    console.log("Saving quiz cache to backend...", {
+      tutorialId,
+      userId,
+      level,
+      quiz,
+    });
     try {
-      console.log("Saving quiz cache to backend:", {
-        tutorialId,
-        userId,
-        level,
-        quiz,
-      });
       const res = await axios.post(
         "https://backend-dc-02.vercel.app/api/quiz/cache",
         { tutorialId, userId, level, quiz }
       );
 
       if (!res?.data?.success) {
-        return rejectWithValue("Gagal menyimpan quiz cache ke server.");
+        throw new Error("Gagal menyimpan quiz cache ke server.");
       }
-
-      console.log("Save quiz cache response:", res.data);
 
       return res.data;
     } catch (err) {
-      console.error("Save quiz cache error:", err.message);
-      return rejectWithValue("Gagal menyimpan quiz cache.");
+      return rejectWithValue(
+        err.response?.data || { message: err.message || "Terjadi kesalahan" }
+      );
     }
   }
 );
@@ -49,22 +47,24 @@ export const loadProgressFromBackend = createAsyncThunk(
         { params: { tutorialId, userId, level } }
       );
 
-      const data = res?.data?.progress;
+      const data = res?.data?.progress || null;
+
       if (data) {
         saveLocalProgress(userId, tutorialId, level, data);
-        return data;
       }
 
-      return null;
+      return data;
     } catch (err) {
-      return rejectWithValue("Gagal memuat progress.", err);
+      return rejectWithValue(
+        err.response?.data || { message: "Gagal memuat progress" }
+      );
     }
   }
 );
 
 export const saveProgressToBackend = createAsyncThunk(
   "quiz/saveBackendProgress",
-  async ({ tutorialId, userId, level, progress }) => {
+  async ({ tutorialId, userId, level, progress }, { rejectWithValue }) => {
     try {
       const res = await axios.post(
         "https://backend-dc-02.vercel.app/api/quiz/progress",
@@ -72,8 +72,10 @@ export const saveProgressToBackend = createAsyncThunk(
       );
 
       return res.data;
-    } catch {
-      return null;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Gagal menyimpan progress" }
+      );
     }
   }
 );
@@ -82,19 +84,19 @@ export const clearBackendQuiz = createAsyncThunk(
   "quiz/clearBackend",
   async (
     { tutorialId, userId, level, cache = true, progress = true },
-    thunkAPI
+    { rejectWithValue }
   ) => {
     try {
       const res = await axios.delete(
         "https://backend-dc-02.vercel.app/api/quiz/clear",
-        {
-          params: { tutorialId, userId, level, cache, progress },
-        }
+        { params: { tutorialId, userId, level, cache, progress } }
       );
 
       return res.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(
+        err.response?.data || { message: "Gagal menghapus data quiz" }
+      );
     }
   }
 );
@@ -123,7 +125,6 @@ export const saveQuizHistory = createAsyncThunk(
         payload
       );
 
-      console.log("Save quiz history response:", res.data);
       return res.data.entry;
     } catch (err) {
       return rejectWithValue(
@@ -138,11 +139,9 @@ export const clearQuizHistory = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       clearHistory();
-
       await axios.delete(
         "https://backend-dc-02.vercel.app/api/quiz/history/clear"
       );
-
       return true;
     } catch (err) {
       return rejectWithValue(
@@ -156,27 +155,19 @@ export const getQuizHistory = createAsyncThunk(
   "quizHistory/get",
   async (_, { rejectWithValue }) => {
     try {
-      const local = loadHistory();
-      if (local.length) {
-        axios
-          .get("https://backend-dc-02.vercel.app/api/quiz/history")
-          .then((res) => {
-            if (Array.isArray(res.data.history)) {
-              replaceHistory(res.data.history);
-            }
-          })
-          .catch(() => {});
-        return local;
-      }
-
       const res = await axios.get(
         "https://backend-dc-02.vercel.app/api/quiz/history"
       );
 
-      const list = res.data.history || [];
-      replaceHistory(list);
+      const list = Array.isArray(res.data.history) ? res.data.history : [];
+
+      localStorage.setItem("quiz_history", JSON.stringify(list));
+
       return list;
     } catch (err) {
+      const local = loadHistory();
+      if (local.length) return local;
+
       return rejectWithValue(
         err.response?.data || { message: "Gagal mengambil history" }
       );

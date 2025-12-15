@@ -11,7 +11,6 @@ import { ITEMS_LIMIT } from "../utils/constants";
 export default function useHistoryScreen(tutorialId) {
   const dispatch = useDispatch();
 
-
   const [showConfirm, setShowConfirm] = useState(false);
   const [historyState, setHistoryState] = useState([]);
   const [page, setPage] = useState(1);
@@ -57,7 +56,7 @@ export default function useHistoryScreen(tutorialId) {
       setPage(1);
       setShowConfirm(false);
     } catch (err) {
-      console.warn("⚠️ Gagal clear history", err);
+      console.warn("Gagal clear history", err);
     }
   };
 

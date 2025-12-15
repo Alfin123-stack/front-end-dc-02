@@ -1,6 +1,5 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 
 import ScoreRing from "./completion/CompletionScoreRing";
@@ -8,33 +7,24 @@ import CompletionHeader from "./completion/CompletionHeader";
 import CompletionMessage from "./completion/CompletionMessage";
 import CompletionButtons from "./completion/CompletionButtons";
 
-import { selectScore } from "../../store/quiz/quizSlice";
-
 import { deleteQuizCache } from "../../store/quiz/quizUtils";
-import {
-  calcScorePercentage,
-  getScoreColorName,
-  scoreColorHex,
-  scoreColorText,
-} from "../../utils/helper";
 import { clearBackendQuiz } from "../../store/quiz/thunks/quizCacheThunks";
+import useCompletionScreen from "../../hooks/useCompletionScreen";
+import { useNavigate } from "react-router-dom";
 
 export default function CompletionScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { level } = useParams();
-  const location = useLocation();
 
-  const query = new URLSearchParams(location.search);
-  const levelNum = Number(level || 1);
-  const tutorialId = Number(query.get("tutorial") || 1);
-  const user = query.get("user") || "";
-
-  const { score = 0 } = useSelector((state) => selectScore(state, tutorialId));
-
-  /* === Gunakan helper === */
-  const percentage = calcScorePercentage(score);
-  const color = getScoreColorName(percentage);
+  const {
+    levelNum,
+    tutorialId,
+    user,
+    percentage,
+    color,
+    scoreColorHex,
+    scoreColorText,
+  } = useCompletionScreen();
 
   return (
     <motion.div

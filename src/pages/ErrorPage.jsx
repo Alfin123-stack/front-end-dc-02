@@ -1,4 +1,3 @@
-// src/pages/ErrorPage.jsx
 import React from "react";
 import { useNavigate, useRouteError } from "react-router-dom";
 import { motion } from "framer-motion";

@@ -1,9 +1,7 @@
-// src/components/common/HistoryDeleteModal.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 import AppButton from "../../ui/AppButton";
-
 
 export default function HistoryDeleteModal({
   handleDeleteAll,
@@ -33,10 +31,7 @@ export default function HistoryDeleteModal({
             Batal
           </AppButton>
 
-          <AppButton
-            variant="danger" // ⬅️ pakai variant danger
-            size="sm"
-            onClick={handleDeleteAll}>
+          <AppButton variant="danger" size="sm" onClick={handleDeleteAll}>
             Hapus
           </AppButton>
         </div>

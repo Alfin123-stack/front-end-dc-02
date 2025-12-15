@@ -17,8 +17,6 @@ export default function QuestionCard({
   const userAns = userAnswer || [];
   const correctAns = correctAnswer || [];
 
-  console.log("Rendering QuestionCard:", { index, userAns, correctAns });
-
   const isCorrect =
     userAns.length === correctAns.length &&
     userAns.every((a) => correctAns.includes(a));
@@ -76,9 +74,7 @@ export default function QuestionCard({
               opt={opt}
               isUser={isUser}
               isCorrect={isTrue}
-              showFeedback={
-                opt.feedback && ((isTrue && !isCorrect) || (isUser && !isTrue))
-              }
+              showFeedback={opt.feedback}
               animation={animation?.option}
             />
           );

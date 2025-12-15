@@ -1,12 +1,9 @@
 import { useMemo } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
-import { resetQuiz, startQuiz } from "../store/quiz/quizSlice";
+import { useSelector } from "react-redux";
 
 export default function useReviewScreen() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
   const { level } = useParams();
 
@@ -17,14 +14,6 @@ export default function useReviewScreen() {
   const userId = Number(query.get("user") || 1);
 
   const { quizData, userAnswers, score } = useSelector((state) => state.quiz);
-
-  const handleRestart = () => {
-    dispatch(resetQuiz());
-    dispatch(startQuiz());
-    navigate(`/quiz/${currentLevel}?tutorial=${tutorialId}&user=${userId}`, {
-      replace: true,
-    });
-  };
 
   const handleBackToResult = () => {
     navigate(
@@ -44,7 +33,6 @@ export default function useReviewScreen() {
     tutorialId,
     userId,
     currentLevel,
-    handleRestart,
     handleBackToResult,
     isEmpty,
   };

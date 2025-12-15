@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
 import HistoryHeader from "./history/HistoryHeader";
@@ -9,10 +9,11 @@ import HistoryPagination from "./history/HistoryPagination";
 
 import EmptyState from "../ui/EmptyState";
 import useHistoryScreen from "../../hooks/useHistoryScreen";
-import LoadingState from "../ui/LoadingState";
+import HistoryLoading from "./history/HistoryLoading";
 
 export default function HistoryScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const query = new URLSearchParams(location.search);
   const tutorialId = Number(query.get("tutorial") || 1);
@@ -32,27 +33,33 @@ export default function HistoryScreen() {
   } = useHistoryScreen(tutorialId);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0d111a] py-10 px-4 text-gray-900 dark:text-gray-200">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0d111a] px-4 py-6 sm:py-10 text-gray-900 dark:text-gray-200">
+      <div className="mx-auto w-full max-w-xl">
+        {/* Header */}
         <HistoryHeader
           navigate={navigate}
           filteredLength={filteredHistory.length}
           setShowConfirm={setShowConfirm}
         />
 
+        {/* Loading */}
         {loading && (
           <div className="mt-6">
-            <LoadingState message="Memuat riwayat quiz..." />
+            <HistoryLoading message="Memuat riwayat kuis..." />
           </div>
         )}
 
+        {/* Empty */}
         {!loading && filteredHistory.length === 0 && (
-          <EmptyState message="Belum ada riwayat untuk tutorial ini." />
+          <div className="mt-8">
+            <EmptyState message="Belum ada riwayat untuk tutorial ini." />
+          </div>
         )}
 
+        {/* List */}
         {!loading && filteredHistory.length > 0 && (
           <>
-            <div className="space-y-5 mt-6">
+            <div className="mt-6 space-y-4 sm:space-y-5">
               {paginatedHistory.map((item, i) => (
                 <HistoryItemCard
                   key={item.id}
@@ -77,6 +84,7 @@ export default function HistoryScreen() {
         )}
       </div>
 
+      {/* Modal */}
       <AnimatePresence>
         {showConfirm && (
           <HistoryDeleteModal

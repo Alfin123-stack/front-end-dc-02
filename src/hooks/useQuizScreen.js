@@ -1,4 +1,3 @@
-// src/hooks/useQuizScreenLogic.js
 import { useState, useEffect, useMemo } from "react";
 
 export default function useQuizScreen({
@@ -22,15 +21,23 @@ export default function useQuizScreen({
   const selected = userAnswers?.[currentQuestion] || [];
 
   useEffect(() => {
-    if (typeof onAutosaveInit === "function") onAutosaveInit();
-  }, []);
+    if (typeof onAutosaveInit === "function") {
+      onAutosaveInit();
+    }
+  }, [onAutosaveInit]);
 
   useEffect(() => {
-    setShowResult(Boolean(submittedState?.[currentQuestion]));
+    const isSubmitted =
+      submittedState?.[currentQuestion] ||
+      submittedState?.[String(currentQuestion)];
+
+    setShowResult(Boolean(isSubmitted));
+
+    setLockAction(false);
   }, [currentQuestion, submittedState]);
 
   const updateAnswer = (arr) => {
-    if (!q) return;
+    if (!q || showResult) return;
     onAnswer(arr);
   };
 
@@ -41,8 +48,13 @@ export default function useQuizScreen({
     const maxCorrect = q.correctAnswers?.length || 1;
     const already = selected.includes(key);
 
-    if (!isMultiple) return updateAnswer([key]);
-    if (already) return updateAnswer(selected.filter((v) => v !== key));
+    if (!isMultiple) {
+      return updateAnswer([key]);
+    }
+
+    if (already) {
+      return updateAnswer(selected.filter((v) => v !== key));
+    }
 
     if (selected.length < maxCorrect) {
       return updateAnswer([...selected, key]);
@@ -58,7 +70,9 @@ export default function useQuizScreen({
     onSubmit();
     setShowResult(true);
 
-    setTimeout(() => setLockAction(false), 260);
+    setTimeout(() => {
+      setLockAction(false);
+    }, 260);
   };
 
   const handleNext = () => {
@@ -69,7 +83,9 @@ export default function useQuizScreen({
 
     if (currentQuestion < (quizData?.length || 0) - 1) {
       onNext();
-      setTimeout(() => setLockAction(false), 260);
+      setTimeout(() => {
+        setLockAction(false);
+      }, 260);
     } else {
       onFinish();
     }

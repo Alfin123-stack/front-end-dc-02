@@ -21,9 +21,6 @@ export default function QuizPage() {
     navigate,
   } = useQuizEngine();
 
-  /* ==========================================================
-     RENDER
-  ========================================================== */
   if (isLoading) return <LoadingScreen />;
 
   if (error)
@@ -39,8 +36,6 @@ export default function QuizPage() {
         Soal tidak tersedia
       </div>
     );
-
-  console.log("Rendering QuizScreen with data:", timeLeft);
 
   return (
     <QuizScreen

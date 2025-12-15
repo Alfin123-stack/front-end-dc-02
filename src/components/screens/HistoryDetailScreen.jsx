@@ -1,19 +1,24 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import QuestionList from "../QuestionList";
-import { loadHistory } from "../../store/quiz/quizUtils";
-import QuizHeader from "../QuizHeader";
-
-import { calcScorePercentage } from "../../utils/helper";
+import QuestionHeader from "../QuestionHeader";
 import EmptyState from "../ui/EmptyState";
+import LoadingState from "./history/HistoryLoading";
+import useHistoryDetailScreen from "../../hooks/useHistoryDetailScreen";
 
 export default function HistoryDetailScreen() {
-  const { id } = useParams();
   const navigate = useNavigate();
 
-  const history = loadHistory();
-  const item = history.find((h) => String(h.id) === String(id));
+  const { loading, item, percentage } = useHistoryDetailScreen();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center px-4">
+        <LoadingState message="Memuat detail riwayat..." />
+      </div>
+    );
+  }
 
   if (!item) {
     return (
@@ -23,13 +28,12 @@ export default function HistoryDetailScreen() {
     );
   }
 
-  const { quizData, userAnswers, score, timestamp } = item;
-  const percentage = calcScorePercentage(score);
+  const { quizData, userAnswers, timestamp } = item;
 
   return (
     <div className="min-h-screen bg-[#f7f9fc] dark:bg-[#0b1220] py-10">
       <div className="max-w-3xl mx-auto px-4 text-gray-900 dark:text-gray-200">
-        <QuizHeader
+        <QuestionHeader
           mode="history"
           percentage={percentage}
           timestamp={timestamp}

@@ -1,4 +1,3 @@
-// src/pages/ReviewPage.jsx
 import React from "react";
 import ReviewScreen from "../components/screens/ReviewScreen";
 

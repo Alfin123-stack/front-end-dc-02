@@ -1,11 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
-import QuestionText from "./QuestionText";
-import OptionsList from "./QuizOptionsList";
+import QuizText from "./QuizText";
+import QuizOptionsList from "./QuizOptionsList";
 import ActionButtons from "./QuizActionButtons";
 import PropTypes from "prop-types";
 
-export default function QuestionCard({
+export default function QuizCard({
   q,
   fadeInUp,
   fadeSlide,
@@ -27,9 +27,9 @@ export default function QuestionCard({
       animate="visible"
       exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
       className="p-5 sm:p-7 rounded-3xl mb-8 bg-white/80 dark:bg-[#0f1a27]/40 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.05)] transition-all">
-      <QuestionText question={q?.question} />
+      <QuizText question={q?.question} />
 
-      <OptionsList
+      <QuizOptionsList
         options={q?.options}
         selected={selected}
         correctAnswers={q?.correctAnswers}
@@ -52,7 +52,7 @@ export default function QuestionCard({
   );
 }
 
-QuestionCard.propTypes = {
+QuizCard.propTypes = {
   q: PropTypes.shape({
     question: PropTypes.string,
     options: PropTypes.arrayOf(
@@ -98,6 +98,6 @@ QuestionCard.propTypes = {
   total: PropTypes.number.isRequired,
 };
 
-QuestionCard.defaultProps = {
+QuizCard.defaultProps = {
   q: null,
 };

@@ -1,4 +1,3 @@
-// src/pages/StartPage.jsx
 import React from "react";
 import StartScreen from "../components/screens/StartScreen";
 

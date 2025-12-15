@@ -13,12 +13,14 @@ export const loadTutorialHeading = createAsyncThunk(
       );
 
       if (!res?.data?.success) {
-        return rejectWithValue("Gagal mendapatkan heading tutorial.");
+        throw new Error("Failed to fetch tutorial heading");
       }
 
       return res.data.heading;
     } catch (err) {
-      return rejectWithValue("Gagal menghubungi server (heading).", err);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to load tutorial heading" }
+      );
     }
   }
 );
@@ -31,8 +33,8 @@ export const loadQuiz = createAsyncThunk(
       const uID = Number(userId);
       const lvl = Number(level);
 
-      if ([tID, uID, lvl].some((v) => isNaN(v))) {
-        return rejectWithValue("Parameter tidak valid.");
+      if ([tID, uID, lvl].some(Number.isNaN)) {
+        throw new Error("Invalid parameters");
       }
 
       const wrap = (data, fromLocal = false, fromBackend = false) => ({
@@ -44,7 +46,7 @@ export const loadQuiz = createAsyncThunk(
 
       const local = loadQuizCache(uID, tID, lvl);
       if (local?.quizData?.length) {
-        return wrap(local, true, false);
+        return wrap(local, true);
       }
 
       try {
@@ -60,46 +62,48 @@ export const loadQuiz = createAsyncThunk(
             quizData: normalizeQuiz(res.data.quizCache.quizData),
           };
 
+          console.log("Loaded quiz cache from backend:", cached);
+
           saveQuizCache(uID, tID, lvl, cached);
           return wrap(cached, false, true);
         }
-      } catch (err) {
-        console.warn("Backend cache gagal:", err?.message);
+      } catch {
+        throw new Error("Failed to cache quiz");
       }
 
-      try {
-        const gen = await axios.post(
-          "https://backend-dc-02.vercel.app/api/quiz/generate",
-          { tutorialId: tID, level: lvl }
-        );
+      const gen = await axios.post(
+        "https://backend-dc-02.vercel.app/api/quiz/generate",
+        { tutorialId: tID, level: lvl }
+      );
 
-        if (gen?.data?.success && Array.isArray(gen.data.quiz)) {
-          const normalized = {
-            tutorial: gen.data.tutorial,
-            meta: gen.data.meta,
-            quizData: normalizeQuiz(gen.data.quiz),
-          };
-
-          console.log("Generated quiz:", normalized);
-
-          saveQuizCache(uID, tID, lvl, normalized);
-
-          dispatch(
-            saveQuizCacheToBackend({
-              tutorialId: tID,
-              userId: uID,
-              level: lvl,
-              quiz: normalized,
-            })
-          );
-
-          return wrap(normalized);
-        }
-      } catch (err) {
-        console.warn("Generate API failed:", err?.message);
+      if (!gen?.data?.success || !Array.isArray(gen.data.quiz)) {
+        throw new Error("Failed to generate quiz");
       }
+
+      const normalized = {
+        tutorial: gen.data.tutorial,
+        meta: gen.data.meta,
+        quizData: normalizeQuiz(gen.data.quiz),
+      };
+
+      console.log("Normalized quiz data:", normalized);
+
+      saveQuizCache(uID, tID, lvl, normalized);
+
+      dispatch(
+        saveQuizCacheToBackend({
+          tutorialId: tID,
+          userId: uID,
+          level: lvl,
+          quiz: normalized,
+        })
+      );
+
+      return wrap(normalized);
     } catch (err) {
-      return rejectWithValue(err?.message || "Terjadi kesalahan.");
+      return rejectWithValue(
+        err.response?.data || { message: err.message || "Failed to load quiz" }
+      );
     }
   }
 );

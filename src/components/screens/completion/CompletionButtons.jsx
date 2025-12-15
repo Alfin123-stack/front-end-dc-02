@@ -1,7 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { HiBookOpen, HiArrowPath, HiHome } from "react-icons/hi2";
-import { clearProgress, invalidateQuiz } from "../../../store/quiz/quizSlice";
+import {
+  clearProgress,
+  invalidateQuiz,
+  resetQuiz,
+} from "../../../store/quiz/quizSlice";
 
 import AppButton from "../../ui/AppButton";
 
@@ -29,8 +33,11 @@ export default function CompletionButtons({
         iconLeft={<HiArrowPath />}
         variant="secondary"
         onClick={() => {
+          dispatch(resetQuiz());
           dispatch(clearProgress({ tutorialId, user, level: levelNum }));
-          navigate(`/quiz/${levelNum}?tutorial=${tutorialId}&user=${user}`);
+          navigate(`/quiz/${levelNum}?tutorial=${tutorialId}&user=${user}`, {
+            replace: true,
+          });
         }}>
         Ulangi Quiz
       </AppButton>

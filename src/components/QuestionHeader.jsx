@@ -6,7 +6,12 @@ import { fadeUp } from "../utils/animations";
 import { formatTimestamp, getPercentColor } from "../utils/helper";
 import AppButton from "./ui/AppButton";
 
-export default function QuizHeader({ mode, timestamp, percentage, onBack }) {
+export default function QuestionHeader({
+  mode,
+  timestamp,
+  percentage,
+  onBack,
+}) {
   const percentColor = getPercentColor(percentage);
 
   return (
@@ -75,7 +80,7 @@ export default function QuizHeader({ mode, timestamp, percentage, onBack }) {
   );
 }
 
-QuizHeader.propTypes = {
+QuestionHeader.propTypes = {
   mode: PropTypes.oneOf(["history", "review"]).isRequired,
 
   timestamp: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

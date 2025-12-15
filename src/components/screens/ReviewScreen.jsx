@@ -1,23 +1,17 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { HiArrowLeft, HiArrowPath } from "react-icons/hi2";
+import { HiArrowLeft } from "react-icons/hi2";
 
 import { containerStagger } from "../../utils/animations";
 import QuestionList from "../QuestionList";
-import QuizHeader from "../QuizHeader";
+import QuizHeader from "../QuestionHeader";
 import AppButton from "../ui/AppButton";
 import EmptyState from "../ui/EmptyState";
 import useReviewScreen from "../../hooks/useReviewScreen";
 
 export default function ReviewScreen() {
-  const {
-    quizData,
-    userAnswers,
-    score,
-    handleRestart,
-    handleBackToResult,
-    isEmpty,
-  } = useReviewScreen();
+  const { quizData, userAnswers, score, handleBackToResult, isEmpty } =
+    useReviewScreen();
 
   if (isEmpty) {
     return (
@@ -44,13 +38,6 @@ export default function ReviewScreen() {
             iconLeft={<HiArrowLeft />}
             variant="dark">
             Kembali ke Hasil
-          </AppButton>
-
-          <AppButton
-            onClick={handleRestart}
-            iconLeft={<HiArrowPath />}
-            variant="primary">
-            Ulangi Quiz
           </AppButton>
         </div>
       </motion.div>

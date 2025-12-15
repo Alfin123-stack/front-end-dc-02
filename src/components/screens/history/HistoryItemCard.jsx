@@ -1,4 +1,3 @@
-// src/components/screens/history/HistoryItemCard.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
@@ -56,9 +55,6 @@ export default function HistoryItemCard({
         </span>
       </div>
 
-      {/* ========================
-          BUTTON PAKAI AppButton
-      ======================== */}
       <AppButton
         onClick={() =>
           navigate(`/history/${item.id}?tutorial=${tutorialId}&user=${userId}`)
@@ -72,9 +68,6 @@ export default function HistoryItemCard({
   );
 }
 
-/* ================================
-   📌 PropTypes
-================================ */
 HistoryItemCard.propTypes = {
   item: PropTypes.shape({
     id: PropTypes.string.isRequired,

@@ -1,4 +1,4 @@
-import { createSelector, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import {
   loadLocalProgress,
   saveLocalProgress,
@@ -7,7 +7,10 @@ import {
 
 import { initialState } from "./quizInitial";
 import { loadQuiz, loadTutorialHeading } from "./thunks/quizThunks";
-import { loadProgressFromBackend } from "./thunks/quizCacheThunks";
+import {
+  getQuizHistory,
+  loadProgressFromBackend,
+} from "./thunks/quizCacheThunks";
 
 const quizSlice = createSlice({
   name: "quiz",
@@ -22,7 +25,6 @@ const quizSlice = createSlice({
     },
 
     setTime(state, action) {
-      // ⛔ JANGAN OVERRIDE TIME HASIL RESTORE
       if (state.restored) return;
 
       state.timeLeft = action.payload;
@@ -94,7 +96,7 @@ const quizSlice = createSlice({
         userAnswers: data.userAnswers ?? [],
         submittedState: data.submittedState ?? {},
         timeLeft: data.timeLeft ?? 30,
-        restored: true, // ✅ PENTING
+        restored: true,
       });
     },
 
@@ -113,9 +115,6 @@ const quizSlice = createSlice({
         level,
       } = action.payload;
 
-      const key = "quiz_history";
-      const existing = JSON.parse(localStorage.getItem(key) || "[]");
-
       const newRecord = {
         id: Date.now(),
         tutorialId,
@@ -128,7 +127,9 @@ const quizSlice = createSlice({
         timestamp: new Date().toISOString(),
       };
 
-      localStorage.setItem(key, JSON.stringify([newRecord, ...existing]));
+      state.history.list.unshift(newRecord);
+
+      localStorage.setItem("quiz_history", JSON.stringify(state.history.list));
     },
   },
 
@@ -164,7 +165,6 @@ const quizSlice = createSlice({
       })
 
       .addCase(loadProgressFromBackend.fulfilled, (state, action) => {
-        if (!state.quizLoaded) return;
         if (!action.payload) return;
 
         const data = action.payload;
@@ -174,7 +174,7 @@ const quizSlice = createSlice({
           userAnswers: data.userAnswers ?? [],
           submittedState: data.submittedState ?? {},
           timeLeft: data.timeLeft ?? 30,
-          restored: true, // ✅ PENTING
+          restored: true,
         });
       })
 
@@ -184,15 +184,22 @@ const quizSlice = createSlice({
 
       .addCase(loadTutorialHeading.rejected, (state, action) => {
         console.warn("Failed to load heading:", action.payload);
+      })
+
+      .addCase(getQuizHistory.pending, (state) => {
+        state.history.loading = true;
+      })
+
+      .addCase(getQuizHistory.fulfilled, (state, action) => {
+        state.history.loading = false;
+        state.history.list = action.payload;
+      })
+
+      .addCase(getQuizHistory.rejected, (state) => {
+        state.history.loading = false;
       });
   },
 });
-
-export const selectScore = createSelector(
-  (state) => state.quiz.score,
-  (state) => state.quiz.totalQuestions,
-  (score, totalQuestions) => ({ score, totalQuestions })
-);
 
 export const {
   tick,

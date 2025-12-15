@@ -52,6 +52,5 @@ const settingsSlice = createSlice({
 });
 
 export const { updateSettings, toggleTheme } = settingsSlice.actions;
-export const selectSettings = (state) => state.settings;
 
 export default settingsSlice.reducer;

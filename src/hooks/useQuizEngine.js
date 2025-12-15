@@ -1,10 +1,8 @@
-// hooks/useQuizEngine.js
 import { useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
   answerQuestion,
-  clearProgress,
   loadProgress,
   nextQuestion,
   saveHistory,
@@ -16,7 +14,6 @@ import {
   tick,
 } from "../store/quiz/quizSlice";
 
-import { loadLocalProgress } from "../store/quiz/quizUtils";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getTimeByLevel } from "../utils/helper";
 import { loadQuiz } from "../store/quiz/thunks/quizThunks";
@@ -33,7 +30,6 @@ export function useQuizEngine() {
   const location = useLocation();
 
   const currentLevel = Number(useParams().level);
-  console.log("level", currentLevel);
 
   const tutorialId = Number(
     new URLSearchParams(location.search).get("tutorial") || 1
@@ -52,7 +48,6 @@ export function useQuizEngine() {
     error,
   } = useSelector((s) => s.quiz);
 
-  // Flags control
   const restoring = useRef(true);
   const autosaveReady = useRef(false);
   const finishing = useRef(false);
@@ -83,41 +78,32 @@ export function useQuizEngine() {
           loadQuiz({ tutorialId, userId, level: currentLevel })
         ).unwrap();
       } catch (err) {
-        console.warn("⚠️ Load quiz failed:", err);
+        console.warn("Load quiz failed:", err.message);
       }
 
       if (!mounted.current || !active) return;
 
-      // 1️⃣ RESTORE LOCAL
-      const local = loadLocalProgress(userId, tutorialId, currentLevel);
+      try {
+        const res = await dispatch(
+          loadProgressFromBackend({
+            tutorialId,
+            userId,
+            level: currentLevel,
+          })
+        );
 
-      if (local) {
-        dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
-      } else {
-        // 2️⃣ RESTORE BACKEND
-        try {
-          const res = await dispatch(
-            loadProgressFromBackend({
-              tutorialId,
-              userId,
-              level: currentLevel,
-            })
-          );
-
-          if (
-            res?.meta?.requestStatus === "fulfilled" &&
-            mounted.current &&
-            active
-          ) {
-            dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
-          }
-        } catch (err) {
-          console.warn("⚠️ Load progress failed:", err);
+        if (
+          res?.meta?.requestStatus === "fulfilled" &&
+          mounted.current &&
+          active
+        ) {
+          dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
         }
+      } catch (err) {
+        console.warn("Load progress failed:", err);
       }
 
       dispatch(setTime(getTimeByLevel(currentLevel)));
-      console.log("Set time for level", currentLevel);
 
       if (mounted.current && active) {
         dispatch(startQuiz());
@@ -144,6 +130,8 @@ export function useQuizEngine() {
       updatedAt: new Date().toISOString(),
     };
 
+    console.log("⏳ Saving progress...", snapshot);
+
     dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
     dispatch(
       saveProgressToBackend({
@@ -155,9 +143,6 @@ export function useQuizEngine() {
     );
   }, [quizStarted]);
 
-  /* ==========================================================
-     TIMER
-  ========================================================== */
   useEffect(() => {
     if (!quizStarted) return;
 
@@ -168,9 +153,6 @@ export function useQuizEngine() {
     return () => clearInterval(interval);
   }, [quizStarted, dispatch]);
 
-  /* ==========================================================
-     AUTOSAVE (DEBOUNCE)
-  ========================================================== */
   const queueAutosave = useCallback(() => {
     if (!autosaveReady.current) return;
     if (restoring.current) return;
@@ -209,7 +191,9 @@ export function useQuizEngine() {
 
       saving.current = true;
 
+      dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
       try {
+        console.log("⏳ Autosaving progress...", pendingSave.current);
         await dispatch(
           saveProgressToBackend({
             tutorialId,
@@ -221,7 +205,7 @@ export function useQuizEngine() {
 
         pendingSave.current = null;
       } catch (err) {
-        console.warn("⚠️ Autosave failed:", err);
+        console.warn("Autosave failed:", err);
       }
 
       saving.current = false;
@@ -251,13 +235,12 @@ export function useQuizEngine() {
           })
         ).unwrap();
       } catch (err) {
-        console.warn("⚠️ Final save failed:", err);
+        console.warn("Final save failed:", err);
       }
       saving.current = false;
       pendingSave.current = null;
     }
 
-    // Score calculation
     let raw = 0;
     quizData.forEach((q, i) => {
       const u = userAnswers[i] || [];
@@ -266,8 +249,8 @@ export function useQuizEngine() {
       if (q.type === "multiple_choice" || q.type === "true_false") {
         if (u[0] === c[0]) raw++;
       } else if (q.type === "multiple_answer") {
-        const benar = u.filter((v) => c.includes(v)).length;
-        raw += benar / (c.length || 1);
+        const correct = u.filter((v) => c.includes(v)).length;
+        raw += correct / (c.length || 1);
       }
     });
 
@@ -275,7 +258,6 @@ export function useQuizEngine() {
 
     dispatch(setScore({ score: finalScore, totalQuestions: quizData.length }));
 
-    // ✅ SIMPAN KE REDIS (BACKEND)
     try {
       await dispatch(
         saveQuizHistory({
@@ -288,7 +270,7 @@ export function useQuizEngine() {
         })
       ).unwrap();
     } catch (err) {
-      console.warn("⚠️ Save history failed:", err);
+      console.warn("Save history failed:", err);
     }
 
     dispatch(
@@ -313,7 +295,7 @@ export function useQuizEngine() {
         })
       ).unwrap();
     } catch (err) {
-      console.warn("⚠️ Clear backend quiz failed:", err);
+      console.warn("Clear backend quiz failed:", err);
     }
 
     localStorage.removeItem(
@@ -334,21 +316,13 @@ export function useQuizEngine() {
     navigate,
   ]);
 
-  /* ==========================================================
-   TIMEOUT HANDLER (TIME LEFT <= 0)
-========================================================== */
   useEffect(() => {
     if (!quizStarted) return;
     if (timeLeft > 0) return;
 
-    console.warn("⏱️ TIME OVER → auto finish");
-
     handleFinish();
   }, [timeLeft, quizStarted, handleFinish]);
 
-  /* ==========================================================
-     HANDLERS
-  ========================================================== */
   const handleAnswer = (v) => {
     dispatch(answerQuestion(v));
     dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));

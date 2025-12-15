@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 
-export default function LoadingState({ message = "Memuat data..." }) {
+export default function HistoryLoading({ message = "Memuat data..." }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 5 }}
@@ -22,6 +22,6 @@ export default function LoadingState({ message = "Memuat data..." }) {
   );
 }
 
-LoadingState.propTypes = {
+HistoryLoading.propTypes = {
   message: PropTypes.string,
 };

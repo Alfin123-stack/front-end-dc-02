@@ -4,9 +4,6 @@ import { motion } from "framer-motion";
 import { htmlToText } from "html-to-text";
 import { HiMiniCheckCircle, HiMiniXCircle } from "react-icons/hi2";
 
-/* =====================================
-   HELPERS
-===================================== */
 const getOptionHighlight = (isUser, isCorrect) => {
   if (isUser && isCorrect) {
     return "border-green-500 bg-green-50 dark:bg-green-900/20";
@@ -38,9 +35,6 @@ const toPlainText = (html) =>
     wordwrap: false,
   });
 
-/* =====================================
-   COMPONENT
-===================================== */
 export default function OptionItem({
   opt,
   isUser,
@@ -102,9 +96,6 @@ export default function OptionItem({
   );
 }
 
-/* =====================================
-   PROP TYPES
-===================================== */
 OptionItem.propTypes = {
   opt: PropTypes.shape({
     key: PropTypes.string.isRequired,

@@ -1,4 +1,3 @@
-// src/components/ui/AppButton.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
@@ -25,7 +24,6 @@ export default function AppButton({
       "bg-transparent border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800",
     indigo: "bg-indigo-600 hover:bg-indigo-700 text-white",
 
-    // ⬇️ NEW
     danger: "bg-red-600 hover:bg-red-700 text-white",
   };
 
@@ -60,7 +58,7 @@ AppButton.propTypes = {
     "dark",
     "subtle",
     "indigo",
-    "danger", // ⬅️ ditambah
+    "danger",
   ]),
   size: PropTypes.oneOf(["sm", "md", "lg"]),
   className: PropTypes.string,
