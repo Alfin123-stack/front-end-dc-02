@@ -108,6 +108,7 @@ const quizSlice = createSlice({
     saveHistory(state, action) {
       const {
         tutorialId,
+        userId,
         quizData,
         userAnswers,
         score,
@@ -118,6 +119,7 @@ const quizSlice = createSlice({
       const newRecord = {
         id: Date.now(),
         tutorialId,
+        userId,
         level,
         quizData,
         userAnswers,

@@ -63,9 +63,11 @@ export const getScoreColorName = (p) => {
   return "green";
 };
 
-export const getFilteredHistory = (history, tutorialId) => {
+export const getFilteredHistory = (history, tutorialId, userId) => {
   return history.filter(
-    (item) => Number(item.tutorialId) === Number(tutorialId)
+    (item) =>
+      Number(item.tutorialId) === Number(tutorialId) &&
+      Number(item.userId) === Number(userId)
   );
 };
 

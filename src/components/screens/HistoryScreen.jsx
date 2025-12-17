@@ -30,7 +30,7 @@ export default function HistoryScreen() {
     nextPage,
     prevPage,
     handleDeleteAll,
-  } = useHistoryScreen(tutorialId);
+  } = useHistoryScreen(tutorialId, userId);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0d111a] px-4 py-6 sm:py-10 text-gray-900 dark:text-gray-200">

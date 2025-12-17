@@ -8,7 +8,7 @@ import {
 } from "../store/quiz/thunks/quizCacheThunks";
 import { ITEMS_LIMIT } from "../utils/constants";
 
-export default function useHistoryScreen(tutorialId) {
+export default function useHistoryScreen(tutorialId, userId) {
   const dispatch = useDispatch();
 
   const [showConfirm, setShowConfirm] = useState(false);
@@ -35,8 +35,8 @@ export default function useHistoryScreen(tutorialId) {
   }, [dispatch]);
 
   const filteredHistory = useMemo(
-    () => getFilteredHistory(historyState, tutorialId),
-    [historyState, tutorialId]
+    () => getFilteredHistory(historyState, tutorialId, userId),
+    [historyState, tutorialId, userId]
   );
 
   const totalPages = getTotalPages(filteredHistory, ITEMS_LIMIT);

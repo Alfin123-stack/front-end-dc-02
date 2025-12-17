@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 
 import {
   answerQuestion,
-  loadProgress,
   nextQuestion,
   saveHistory,
   saveProgress,
@@ -84,21 +83,13 @@ export function useQuizEngine() {
       if (!mounted.current || !active) return;
 
       try {
-        const res = await dispatch(
+        dispatch(
           loadProgressFromBackend({
             tutorialId,
             userId,
             level: currentLevel,
           })
         );
-
-        if (
-          res?.meta?.requestStatus === "fulfilled" &&
-          mounted.current &&
-          active
-        ) {
-          dispatch(loadProgress({ tutorialId, userId, level: currentLevel }));
-        }
       } catch (err) {
         console.warn("Load progress failed:", err);
       }
@@ -258,6 +249,7 @@ export function useQuizEngine() {
       await dispatch(
         saveQuizHistory({
           tutorialId,
+          userId,
           quizData,
           userAnswers,
           score: finalScore,
@@ -272,6 +264,7 @@ export function useQuizEngine() {
     dispatch(
       saveHistory({
         tutorialId,
+        userId,
         quizData,
         userAnswers,
         score: finalScore,

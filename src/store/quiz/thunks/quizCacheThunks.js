@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import {
   clearHistory,
+  deleteLocalProgress,
   loadHistory,
   loadLocalProgress,
   saveLocalProgress,
@@ -11,14 +12,13 @@ export const saveQuizCacheToBackend = createAsyncThunk(
   "quiz/saveBackendQuizCache",
   async ({ tutorialId, userId, level, quiz }, { rejectWithValue }) => {
     try {
-      // ⛔ Guard keras
       if (
         !quiz ||
         !Array.isArray(quiz.quizData) ||
         quiz.quizData.length === 0
       ) {
         return rejectWithValue({
-          message: "Quiz cache tidak valid, tidak disimpan",
+          message: "Invalid quiz cache. Nothing was saved.",
         });
       }
 
@@ -28,13 +28,15 @@ export const saveQuizCacheToBackend = createAsyncThunk(
       );
 
       if (!res?.data?.success) {
-        throw new Error("Gagal menyimpan quiz cache ke server.");
+        throw new Error("Failed to save quiz cache to the server.");
       }
 
       return res.data;
     } catch (err) {
       return rejectWithValue(
-        err.response?.data || { message: err.message || "Terjadi kesalahan" }
+        err.response?.data || {
+          message: err.message || "An unexpected error occurred.",
+        }
       );
     }
   }
@@ -44,11 +46,8 @@ export const loadProgressFromBackend = createAsyncThunk(
   "quiz/loadBackendProgress",
   async ({ tutorialId, userId, level }, { rejectWithValue }) => {
     try {
-      const key = `quiz_progress:${userId}:${tutorialId}:${level}`;
       const local = loadLocalProgress(userId, tutorialId, level);
 
-      // 1️⃣ Kalau local TIDAK ADA → tidak perlu hapus apa pun
-      //    langsung cek backend
       const res = await axios.get(
         "https://backend-dc-02.vercel.app/api/quiz/progress",
         { params: { tutorialId, userId, level } }
@@ -56,23 +55,24 @@ export const loadProgressFromBackend = createAsyncThunk(
 
       const data = res?.data?.progress ?? null;
 
-      // 2️⃣ Backend TIDAK ADA progress
       if (!data) {
-        // ➜ hanya hapus local JIKA local memang ada
         if (local) {
           try {
-            localStorage.removeItem(key);
-          } catch {}
+            deleteLocalProgress(userId, tutorialId, level);
+          } catch {
+            console.warn("Failed to remove local progress cache.");
+          }
         }
         return null;
       }
 
-      // 3️⃣ Backend ADA progress → sync ke local
       saveLocalProgress(userId, tutorialId, level, data);
       return data;
     } catch (err) {
       return rejectWithValue(
-        err.response?.data || { message: "Gagal memuat progress" }
+        err.response?.data || {
+          message: "Failed to load quiz progress from server.",
+        }
       );
     }
   }
@@ -83,7 +83,9 @@ export const saveProgressToBackend = createAsyncThunk(
   async ({ tutorialId, userId, level, progress }, { rejectWithValue }) => {
     try {
       if (!progress || typeof progress !== "object") {
-        return rejectWithValue({ message: "Progress tidak valid" });
+        return rejectWithValue({
+          message: "Invalid progress data.",
+        });
       }
 
       saveLocalProgress(userId, tutorialId, level, progress);
@@ -96,7 +98,9 @@ export const saveProgressToBackend = createAsyncThunk(
       return res.data;
     } catch (err) {
       return rejectWithValue(
-        err.response?.data || { message: "Gagal menyimpan progress" }
+        err.response?.data || {
+          message: "Failed to save quiz progress.",
+        }
       );
     }
   }
@@ -117,7 +121,9 @@ export const clearBackendQuiz = createAsyncThunk(
       return res.data;
     } catch (err) {
       return rejectWithValue(
-        err.response?.data || { message: "Gagal menghapus data quiz" }
+        err.response?.data || {
+          message: "Failed to clear quiz data.",
+        }
       );
     }
   }
@@ -126,13 +132,14 @@ export const clearBackendQuiz = createAsyncThunk(
 export const saveQuizHistory = createAsyncThunk(
   "quizHistory/save",
   async (
-    { tutorialId, quizData, userAnswers, score, totalQuestions, level },
+    { tutorialId, userId, quizData, userAnswers, score, totalQuestions, level },
     { rejectWithValue }
   ) => {
     try {
       const payload = {
         id: Date.now(),
         tutorialId,
+        userId,
         level,
         quizData,
         userAnswers,
@@ -150,7 +157,9 @@ export const saveQuizHistory = createAsyncThunk(
       return res.data.entry;
     } catch (err) {
       return rejectWithValue(
-        err.response?.data || { message: "Gagal menyimpan history" }
+        err.response?.data || {
+          message: "Failed to save quiz history.",
+        }
       );
     }
   }
@@ -167,7 +176,9 @@ export const clearQuizHistory = createAsyncThunk(
       return true;
     } catch (err) {
       return rejectWithValue(
-        err.response?.data || { message: "Gagal menghapus history" }
+        err.response?.data || {
+          message: "Failed to clear quiz history.",
+        }
       );
     }
   }
@@ -191,7 +202,9 @@ export const getQuizHistory = createAsyncThunk(
       if (local.length) return local;
 
       return rejectWithValue(
-        err.response?.data || { message: "Gagal mengambil history" }
+        err.response?.data || {
+          message: "Failed to fetch quiz history.",
+        }
       );
     }
   }
