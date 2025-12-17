@@ -44,29 +44,32 @@ export const loadProgressFromBackend = createAsyncThunk(
   "quiz/loadBackendProgress",
   async ({ tutorialId, userId, level }, { rejectWithValue }) => {
     try {
+      const key = `quiz_progress:${userId}:${tutorialId}:${level}`;
       const local = loadLocalProgress(userId, tutorialId, level);
 
+      // 1️⃣ Kalau local TIDAK ADA → tidak perlu hapus apa pun
+      //    langsung cek backend
       const res = await axios.get(
         "https://backend-dc-02.vercel.app/api/quiz/progress",
         { params: { tutorialId, userId, level } }
       );
 
-      const data = res?.data?.progress || null;
+      const data = res?.data?.progress ?? null;
 
-      // ⛔ Backend kosong → local HARUS ikut kosong
-      if (!data && local) {
-        localStorage.removeItem(
-          `quiz_progress:${userId}:${tutorialId}:${level}`
-        );
+      // 2️⃣ Backend TIDAK ADA progress
+      if (!data) {
+        // ➜ hanya hapus local JIKA local memang ada
+        if (local) {
+          try {
+            localStorage.removeItem(key);
+          } catch {}
+        }
         return null;
       }
 
-      if (data) {
-        saveLocalProgress(userId, tutorialId, level, data);
-        return data;
-      }
-
-      return null;
+      // 3️⃣ Backend ADA progress → sync ke local
+      saveLocalProgress(userId, tutorialId, level, data);
+      return data;
     } catch (err) {
       return rejectWithValue(
         err.response?.data || { message: "Gagal memuat progress" }
