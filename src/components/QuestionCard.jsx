@@ -21,8 +21,6 @@ export default function QuestionCard({
     userAns.length === correctAns.length &&
     userAns.every((a) => correctAns.includes(a));
 
-  console.log("QuestionCard isCorrect:", isCorrect);
-
   return (
     <motion.div
       variants={animation}

@@ -44,33 +44,59 @@ export const loadQuiz = createAsyncThunk(
         data,
       });
 
+      const isValidQuiz = (q) =>
+        q && Array.isArray(q.quizData) && q.quizData.length > 0;
+
+      const clearLocalQuizCache = () => {
+        try {
+          localStorage.removeItem(`quiz_cache:${uID}:${tID}:${lvl}`);
+        } catch {}
+      };
+
+      /* ======================
+         1️⃣ LOCAL CACHE
+      ====================== */
       const local = loadQuizCache(uID, tID, lvl);
-      if (local?.quizData?.length) {
+      if (isValidQuiz(local)) {
         return wrap(local, true);
       }
 
+      /* ======================
+         2️⃣ BACKEND CACHE
+      ====================== */
       try {
         const res = await axios.get(
           "https://backend-dc-02.vercel.app/api/quiz/cache",
           { params: { tutorialId: tID, userId: uID, level: lvl } }
         );
 
-        if (res?.data?.success && res.data.quizCache) {
+        const qc = res?.data?.quizCache;
+
+        // ⛔ Backend TIDAK punya cache → local harus dihapus
+        if (res?.data?.success && !qc) {
+          clearLocalQuizCache();
+        }
+
+        // ✅ Backend punya cache valid
+        if (res?.data?.success && qc) {
           const cached = {
-            tutorial: res.data.quizCache.tutorial,
-            meta: res.data.quizCache.meta,
-            quizData: normalizeQuiz(res.data.quizCache.quizData),
+            tutorial: qc.tutorial,
+            meta: qc.meta,
+            quizData: normalizeQuiz(qc.quizData),
           };
 
-          console.log("Loaded quiz cache from backend:", cached);
-
-          saveQuizCache(uID, tID, lvl, cached);
-          return wrap(cached, false, true);
+          if (isValidQuiz(cached)) {
+            saveQuizCache(uID, tID, lvl, cached);
+            return wrap(cached, false, true);
+          }
         }
       } catch {
-        throw new Error("Failed to cache quiz");
+        // silent fail → lanjut generate
       }
 
+      /* ======================
+         3️⃣ GENERATE QUIZ
+      ====================== */
       const gen = await axios.post(
         "https://backend-dc-02.vercel.app/api/quiz/generate",
         { tutorialId: tID, level: lvl }
@@ -86,8 +112,13 @@ export const loadQuiz = createAsyncThunk(
         quizData: normalizeQuiz(gen.data.quiz),
       };
 
-      console.log("Normalized quiz data:", normalized);
+      if (!isValidQuiz(normalized)) {
+        throw new Error("Generated quiz is empty");
+      }
 
+      /* ======================
+         4️⃣ SAVE CACHE (SAFE)
+      ====================== */
       saveQuizCache(uID, tID, lvl, normalized);
 
       dispatch(
@@ -102,7 +133,9 @@ export const loadQuiz = createAsyncThunk(
       return wrap(normalized);
     } catch (err) {
       return rejectWithValue(
-        err.response?.data || { message: err.message || "Failed to load quiz" }
+        err.response?.data || {
+          message: err.message || "Failed to load quiz",
+        }
       );
     }
   }

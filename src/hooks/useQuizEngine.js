@@ -130,9 +130,6 @@ export function useQuizEngine() {
       updatedAt: new Date().toISOString(),
     };
 
-    console.log("⏳ Saving progress...", snapshot);
-
-    dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
     dispatch(
       saveProgressToBackend({
         tutorialId,
@@ -193,7 +190,6 @@ export function useQuizEngine() {
 
       dispatch(saveProgress({ tutorialId, userId, level: currentLevel }));
       try {
-        console.log("⏳ Autosaving progress...", pendingSave.current);
         await dispatch(
           saveProgressToBackend({
             tutorialId,

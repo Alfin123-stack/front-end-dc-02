@@ -10,13 +10,18 @@ import {
 export const saveQuizCacheToBackend = createAsyncThunk(
   "quiz/saveBackendQuizCache",
   async ({ tutorialId, userId, level, quiz }, { rejectWithValue }) => {
-    console.log("Saving quiz cache to backend...", {
-      tutorialId,
-      userId,
-      level,
-      quiz,
-    });
     try {
+      // ⛔ Guard keras
+      if (
+        !quiz ||
+        !Array.isArray(quiz.quizData) ||
+        quiz.quizData.length === 0
+      ) {
+        return rejectWithValue({
+          message: "Quiz cache tidak valid, tidak disimpan",
+        });
+      }
+
       const res = await axios.post(
         "https://backend-dc-02.vercel.app/api/quiz/cache",
         { tutorialId, userId, level, quiz }
@@ -40,7 +45,6 @@ export const loadProgressFromBackend = createAsyncThunk(
   async ({ tutorialId, userId, level }, { rejectWithValue }) => {
     try {
       const local = loadLocalProgress(userId, tutorialId, level);
-      if (local) return local;
 
       const res = await axios.get(
         "https://backend-dc-02.vercel.app/api/quiz/progress",
@@ -49,11 +53,20 @@ export const loadProgressFromBackend = createAsyncThunk(
 
       const data = res?.data?.progress || null;
 
-      if (data) {
-        saveLocalProgress(userId, tutorialId, level, data);
+      // ⛔ Backend kosong → local HARUS ikut kosong
+      if (!data && local) {
+        localStorage.removeItem(
+          `quiz_progress:${userId}:${tutorialId}:${level}`
+        );
+        return null;
       }
 
-      return data;
+      if (data) {
+        saveLocalProgress(userId, tutorialId, level, data);
+        return data;
+      }
+
+      return null;
     } catch (err) {
       return rejectWithValue(
         err.response?.data || { message: "Gagal memuat progress" }
@@ -66,6 +79,12 @@ export const saveProgressToBackend = createAsyncThunk(
   "quiz/saveBackendProgress",
   async ({ tutorialId, userId, level, progress }, { rejectWithValue }) => {
     try {
+      if (!progress || typeof progress !== "object") {
+        return rejectWithValue({ message: "Progress tidak valid" });
+      }
+
+      saveLocalProgress(userId, tutorialId, level, progress);
+
       const res = await axios.post(
         "https://backend-dc-02.vercel.app/api/quiz/progress",
         { tutorialId, userId, level, progress }
