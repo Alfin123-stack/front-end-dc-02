@@ -17,18 +17,10 @@ export default function QuizPage() {
     handleNext,
     handleFinish,
     isLoading,
-    error,
     navigate,
   } = useQuizEngine();
 
   if (isLoading) return <LoadingScreen />;
-
-  if (error)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
-        Terjadi kesalahan: {String(error)}
-      </div>
-    );
 
   if (!quizData || quizData.length === 0)
     return (
